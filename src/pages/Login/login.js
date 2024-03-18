@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import {
     TextField,
     FormControl,
@@ -20,16 +21,22 @@ const Login = () => {
     const [senha, setSenha] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
+    const navigate = useNavigate();
+
     const handleLogin = () => {
         console.log("login", login, senha)
     }
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
-
+        
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
 
+    const handleNavigate = (url) => {
+        navigate(url)
+    }
+    
   return (
     <Grid container style={{ height: '100vh' }}>
         <Grid item xs={6} style={{ backgroundColor: '#5B71EE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff' }}>
@@ -94,11 +101,11 @@ const Login = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <Typography color="#98A2B3" fontSize={16}>
-                            Não possui uma conta? <Button variant="text">Crie sua conta</Button>
+                            Não possui uma conta? <Button onClick={() => handleNavigate("/register")} variant="text">Crie sua conta</Button>
                         </Typography>
                     </Grid>
                     <Grid item xs={12}>
-                        <Button variant="text">Continuar como visitante</Button>
+                        <Button onClick={() => handleNavigate("/")} variant="text">Continuar como visitante</Button>
                     </Grid>
                 </Grid>
             </Grid>
