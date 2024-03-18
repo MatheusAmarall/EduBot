@@ -12,6 +12,7 @@ import {
   } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
     const [matricula, setMatricula] = useState("");
@@ -19,6 +20,8 @@ const Register = () => {
     const [confirmaSenha, setConfirmaSenha] = useState("")
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleRegister = () => {
         console.log("login", matricula, senha, confirmaSenha)
@@ -32,6 +35,9 @@ const Register = () => {
         event.preventDefault();
     };
 
+    const handleNavigate = (url) => {
+        navigate(url)
+    }
   return (
     <Grid container style={{ height: '100vh' }}>
         <Grid item xs={12} style={{ backgroundColor: '#5B71EE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -116,18 +122,13 @@ const Register = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <Typography color="#98A2B3" fontSize={16}>
-                            Já possui uma conta? <Button variant="text">Entrar</Button>
+                            Já possui uma conta? <Button onClick={() => handleNavigate("/login")} variant="text">Entrar</Button>
                         </Typography>
                     </Grid>
                 </Grid>
             </Grid>
             
         </Grid>
-        {/* <Grid item xs={6} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Grid item xs={8} style={{ textAlign: 'center' }}>
-                
-            </Grid>
-        </Grid> */}
     </Grid>
   )
 }
