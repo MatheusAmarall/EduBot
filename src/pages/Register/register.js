@@ -122,12 +122,11 @@ const Register = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <Typography color="#98A2B3" fontSize={16}>
-                            Já possui uma conta? <Button onClick={() => handleNavigate("/login")} variant="text">Entrar</Button>
+                            Já possui uma conta? <Button onClick={() => handleNavigate("/")} variant="text">Entrar</Button>
                         </Typography>
                     </Grid>
                 </Grid>
             </Grid>
-            
         </Grid>
     </Grid>
   )

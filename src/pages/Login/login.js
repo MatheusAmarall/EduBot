@@ -105,7 +105,7 @@ const Login = () => {
                         </Typography>
                     </Grid>
                     <Grid item xs={12}>
-                        <Button onClick={() => handleNavigate("/")} variant="text">Continuar como visitante</Button>
+                        <Button onClick={() => handleNavigate("/home")} variant="text">Continuar como visitante</Button>
                     </Grid>
                 </Grid>
             </Grid>
