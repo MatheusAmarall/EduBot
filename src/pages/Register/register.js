@@ -21,7 +21,7 @@ const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const handleRegister = () => {
         console.log("login", matricula, senha, confirmaSenha)
@@ -38,7 +38,6 @@ const Register = () => {
     const handleNavigate = (url) => {
         navigate(url)
     }
-
   return (
     <Grid container style={{ height: '100vh' }}>
         <Grid item xs={12} style={{ backgroundColor: '#5B71EE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
