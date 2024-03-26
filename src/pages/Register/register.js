@@ -8,13 +8,17 @@ import {
     InputAdornment,
     IconButton,
     InputLabel,
-    OutlinedInput
+    OutlinedInput,
+    Switch,
+    FormControlLabel
   } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
+    const [isCoordenador, setIsCoordenador] = useState(false);
+    const [email, setEmail] = useState("");
     const [matricula, setMatricula] = useState("");
     const [senha, setSenha] = useState("")
     const [confirmaSenha, setConfirmaSenha] = useState("")
@@ -24,7 +28,7 @@ const Register = () => {
     const navigate = useNavigate();
 
     const handleRegister = () => {
-        console.log("login", matricula, senha, confirmaSenha)
+        console.log("login", email, matricula, senha, confirmaSenha)
     }
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -39,19 +43,45 @@ const Register = () => {
         navigate(url)
     }
   return (
-    <Grid container style={{ height: '100vh' }}>
-        <Grid item xs={12} style={{ backgroundColor: '#5B71EE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Grid container style={{ height: "100vh" }}>
+        <Grid item xs={12} style={{ backgroundColor: "#5B71EE", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Grid item xs={6} backgroundColor="white" padding={10} borderRadius={5}>
                 <Grid container direction="column" spacing={2} textAlign="center">
                     <Grid item xs={12}>
-                        <Typography fontWeight="bold" fontSize={24}>
+                        <Typography fontWeight="bold" fontSize={28} style={{ userSelect: "none" }}>
                             Crie sua conta
                         </Typography>
+                    </Grid>
+                    <Grid item xs={12} style={{ display: "flex", alignItems: "center" }}>
+                        <FormControl>
+                            <Typography fontSize={19} style={{ userSelect: "none", marginRight: "20px" }}>
+                                Membro Da Coordenação
+                            </Typography>
+                        </FormControl>
+                        <FormControlLabel style={{ userSelect: "none"}}control={<Switch
+                            checked={isCoordenador} 
+                            onChange={(e) => {
+                                setIsCoordenador(e.target.checked);
+                            }}
+                        />}/>
                     </Grid>
                     <Grid item xs={12}>
                         <FormControl fullWidth>
                             <TextField
-                                label="Insira sua matrícula"
+                                label="Email"
+                                variant="outlined"
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                }}
+                                value={email}
+                                required={true}
+                            />
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <TextField
+                                label="Matrícula"
                                 variant="outlined"
                                 onChange={(e) => {
                                     setMatricula(e.target.value);
@@ -66,7 +96,7 @@ const Register = () => {
                             <InputLabel htmlFor="senha">Crie uma senha *</InputLabel>
                             <OutlinedInput
                                 id="senha"
-                                type={showPassword ? 'text' : 'password'}
+                                type={showPassword ? "text" : "password"}
                                 endAdornment={
                                 <InputAdornment position="end">
                                     <IconButton
@@ -91,7 +121,7 @@ const Register = () => {
                             <InputLabel htmlFor="confirma-senha">Confirme sua senha *</InputLabel>
                             <OutlinedInput
                                 id="confirma-senha"
-                                type={showConfirmPassword ? 'text' : 'password'}
+                                type={showConfirmPassword ? "text" : "password"}
                                 endAdornment={
                                 <InputAdornment position="end">
                                     <IconButton
@@ -121,8 +151,8 @@ const Register = () => {
                         </Button>
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography color="#98A2B3" fontSize={16}>
-                            Já possui uma conta? <Button onClick={() => handleNavigate("/login")} variant="text">Entrar</Button>
+                        <Typography color="#98A2B3" fontSize={16} style={{ userSelect: "none" }}>
+                            Já possui uma conta? <Button onClick={() => handleNavigate("/")} variant="text">Entrar</Button>
                         </Typography>
                     </Grid>
                 </Grid>
