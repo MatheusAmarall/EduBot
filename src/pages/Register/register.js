@@ -157,7 +157,6 @@ const Register = () => {
                     </Grid>
                 </Grid>
             </Grid>
-            
         </Grid>
     </Grid>
   )
