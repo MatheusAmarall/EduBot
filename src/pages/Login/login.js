@@ -41,21 +41,21 @@ const Login = () => {
     <Grid container style={{ height: '100vh' }}>
         <Grid item xs={6} style={{ backgroundColor: '#5B71EE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff' }}>
             <Grid item xs={10}>
-                <Typography fontSize={48} fontStyle="italic">Seja bem vindo ao EDU website, onde você acompanha a vida escolar do seu filho(a).</Typography>
+                <Typography fontSize={48} fontStyle="italic" style={{ userSelect: 'none' }}>Seja bem vindo ao EDU website, onde você acompanha a vida escolar do seu filho(a).</Typography>
             </Grid>
         </Grid>
         <Grid item xs={6} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Grid item xs={8} style={{ textAlign: 'center' }}>
                 <Grid container direction="column" spacing={2}>
                     <Grid item xs={12}>
-                        <Typography fontWeight="bold" fontSize={24} align="left">
+                        <Typography fontWeight="bold" fontSize={24} align="left" style={{ userSelect: 'none' }}>
                             Entre em sua conta
                         </Typography>
                     </Grid>
                     <Grid item xs={12}>
                         <FormControl fullWidth>
                             <TextField
-                                label="Insira sua matrícula"
+                                label="Email"
                                 variant="outlined"
                                 onChange={(e) => {
                                     setLogin(e.target.value);
@@ -67,10 +67,10 @@ const Login = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <FormControl fullWidth>
-                            <InputLabel htmlFor="senha">Insira sua senha *</InputLabel>
+                            <InputLabel htmlFor="senha">Senha *</InputLabel>
                             <OutlinedInput
                                 id="senha"
-                                type={showPassword ? 'text' : 'password'}
+                                type={showPassword ? "text" : "password"}
                                 endAdornment={
                                 <InputAdornment position="end">
                                     <IconButton
@@ -82,7 +82,7 @@ const Login = () => {
                                     </IconButton>
                                 </InputAdornment>
                                 }
-                                label="Insira sua senha *"
+                                label="Senha *"
                                 onChange={(e) => {
                                     setSenha(e.target.value);
                                 }}  
@@ -100,7 +100,7 @@ const Login = () => {
                         </Button>
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography color="#98A2B3" fontSize={16}>
+                        <Typography color="#98A2B3" fontSize={16} style={{ userSelect: "none" }}>
                             Não possui uma conta? <Button onClick={() => handleNavigate("/register")} variant="text">Crie sua conta</Button>
                         </Typography>
                     </Grid>
