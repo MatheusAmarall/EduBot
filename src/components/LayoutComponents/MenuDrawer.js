@@ -1,30 +1,41 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
-import { 
+import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
+import {
   Grid,
-  Avatar, 
-  Typography, 
-  List, 
+  Avatar,
+  Typography,
+  List,
   ListItem,
   ListItemButton,
-  ListItemIcon,
+  ListItemAvatar,
   ListItemText,
+  IconButton,
   Box,
   Drawer,
   CssBaseline,
   Toolbar,
   Divider,
-  IconButton,
-  } from '@mui/material'
+  ListItemIcon
+} from '@mui/material'
 import MuiAppBar from '@mui/material/AppBar';
 import { deepOrange } from '@mui/material/colors';
 
-const drawerWidth = 240;
+const drawerWidth = 300;
+
+const Root = styled('div')(({ theme }) => ({
+  width: '100%',
+  ...theme.typography.body2,
+  color: theme.palette.text.secondary,
+  '& > :not(style) ~ :not(style)': {
+    marginTop: theme.spacing(2),
+  },
+}));
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -75,6 +86,8 @@ export default function MenuDrawer({ children }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
+  const navigate = useNavigate();
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -82,6 +95,14 @@ export default function MenuDrawer({ children }) {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const handleLogout = () => {
+    navigate("/")
+  }
+
+  const loggedUser = () => {
+    return false;
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -117,36 +138,52 @@ export default function MenuDrawer({ children }) {
         open={open}
       >
         <DrawerHeader>
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar alt="Profile Picture" />
+            </ListItemAvatar>
+            <ListItemText primary="Pedro da Silva" secondary="4º série B" />
+          </ListItem>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </DrawerHeader>
-        <Divider />
-        <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
+        <Grid container direction="column" height="100%" justifyContent="space-between">
+          <Grid item>
+            <ListItem>
+              <ListItemButton style={{ border: '1px solid black', borderRadius: '5px', textAlign: 'center' }}>
+                <ListItemText primary="Criar nova conversa" />
               </ListItemButton>
             </ListItem>
-          ))}
-        </List>
-        <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
+            <Root>
+              <Divider>Histórico de atendimentos</Divider>
+            </Root>
+            <List>
+              {['All mail', 'Trash', 'Spam'].map((text, index) => (
+                <ListItem key={index}>
+                  <ListItemButton>
+                    <ListItemText primary="Matheus Amaral" secondary="Informações sobre matrícula" />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Grid>
+          <Grid item>
+            <ListItem>
+              <ListItemButton style={{ textAlign: 'center' }} onClick={handleLogout}> 
                 <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                  {loggedUser()
+                    ? 
+                      <LogoutIcon /> 
+                    :
+                      <LoginIcon />
+                  }
                 </ListItemIcon>
-                <ListItemText primary={text} />
+                <ListItemText primary={loggedUser() ? "Sair" : "Entrar/Registrar"} />
               </ListItemButton>
             </ListItem>
-          ))}
-        </List>
+          </Grid>
+        </Grid>
       </Drawer>
       <Main open={open}>
         <Grid container marginTop={5}>
