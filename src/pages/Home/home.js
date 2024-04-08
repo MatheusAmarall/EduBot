@@ -1,80 +1,47 @@
 import { Grid, Avatar, List, ListItem, ListItemAvatar, ListItemText, IconButton, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useContext } from 'react'
 import MenuDrawer from '../../components/LayoutComponents/MenuDrawer';
 import SendIcon from '@mui/icons-material/Send';
+import AppContext from '../../context/context';
+import { sendMessage } from '../../middlewares/HomeMiddleware';
 
 const Home = () => {
-  const [messages, setMessages] = useState([]);
+  const [mensagens, setMensagens] = useState([]);
   const [mensagemDigitada, setMensagemDigitada] = useState("");
 
-  const getMessages = () => {
-    const mensagens = [
-      {
-        "id": 1,
-        "nomeUsuario": "Matheus Amaral da silva",
-        "descricao": "Um texto de testezinho"
-      },
-      {
-        "id": 2,
-        "nomeUsuario": "Matheus Amaral",
-        "descricao": "Um texto de testezinho"
-      },
-      {
-        "id": 3,
-        "nomeUsuario": "Matheus Amaral",
-        "descricao": "Um texto de testezinho"
-      },
-      {
-        "id": 4,
-        "nomeUsuario": "Matheus Amaral",
-        "descricao": "Um texto de testezinho"
-      },
-      {
-        "id": 5,
-        "nomeUsuario": "Matheus Amaral",
-        "descricao": "Um texto de testezinho"
-      },
-      {
-        "id": 6,
-        "nomeUsuario": "Matheus Amaral",
-        "descricao": "Um texto de testezinho"
-      },
-      {
-        "id": 7,
-        "nomeUsuario": "Matheus Amaral",
-        "descricao": "Um texto de testezinho"
-      },
-      {
-        "id": 8,
-        "nomeUsuario": "Matheus Amaral",
-        "descricao": "Um texto de testezinho"
-      },
-      {
-        "id": 9,
-        "nomeUsuario": "Matheus Amaral",
-        "descricao": "Um texto de testezinho"
-      },
-      {
-        "id": 9,
-        "nomeUsuario": "Matheus Amaral",
-        "descricao": "Um texto de testezinho"
-      },
-      {
-        "id": 9,
-        "nomeUsuario": "Matheus Amaral",
-        "descricao": "Um texto de testezinho"
-      },
-    ]
-    setMessages(mensagens)
-  }
+  const globalContext = useContext(AppContext);
 
   const isSentByCurrentUser = (user) => {
     return user === "Matheus Amaral"
   }
 
   const handleSendMessage = () =>{
-    console.log(mensagemDigitada);
+    const mensagem = {
+      sender: "Matheus Amaral",
+      message: mensagemDigitada
+    };
+
+    const mensagemUsuario = {
+      nomeUsuario: mensagem.sender,
+      texto: mensagem.message
+    }
+
+    setMensagens(prevState => [...prevState, mensagemUsuario]);
     setMensagemDigitada("")
+
+    sendMessage(mensagem, globalContext, true)
+      .then((resultado) => {
+        console.log(resultado.data)
+        
+        resultado.data.forEach((mensagem) => {
+          const mensagemBot = {
+            nomeUsuario: "EduBot",
+            texto: mensagem.text
+          }
+          setMensagens(prevState => [...prevState, mensagemBot]);
+        })
+      })
+      .catch(() => {});
   }
 
   const handleKeyPress = (e) => {
@@ -82,16 +49,12 @@ const Home = () => {
       handleSendMessage();
     }
   };
-
-  useEffect(() => {
-    getMessages();
-  }, [])
   return (
     <MenuDrawer>
       <Grid container>
         <Grid item xs={12} style={{ flexGrow: 1, overflow: "auto", height: "80vh" }}>
           <List style={{ display: 'flex', flexDirection: 'column' }}>
-            {messages.map((message, index) => (
+            {mensagens.map((message, index) => (
               <ListItem
                 key={index}
                 style={{
@@ -107,7 +70,7 @@ const Home = () => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={message.nomeUsuario}
-                  secondary={message.descricao}
+                  secondary={message.texto}
                   style={{ textAlign: isSentByCurrentUser(message.nomeUsuario) ? 'right' : 'left' }}
                 />
               </ListItem>

@@ -1,3 +1,3 @@
 export const Endpoint = {
-    Bff: "teste",
+    Bff: process.env.REACT_APP_URL_API_BFF,
 };
