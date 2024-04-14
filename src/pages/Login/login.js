@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import {
     TextField,
@@ -15,16 +15,46 @@ import {
     Visibility,
     VisibilityOff
 } from '@mui/icons-material';
+import { loginUser, visitorUser } from '../../middlewares/AuthMiddleware';
+import AppContext from '../../context/context';
+import { Message } from '../../enums/messageEnum';
 
 const Login = () => {
     const [login, setLogin] = useState("");
     const [senha, setSenha] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
+    const globalContext = useContext(AppContext);
+
     const navigate = useNavigate();
 
     const handleLogin = () => {
-        console.log("login", login, senha)
+        const dadosLogin = {
+            email: login,
+            password: senha
+        };
+      
+        loginUser(dadosLogin, globalContext)
+        .then((resultado) => {
+            globalContext.showMessage(Message.Success, "Login efetuado com sucesso");
+            sessionStorage.setItem("token", resultado.data.token);
+            sessionStorage.setItem("role", resultado.data.role);
+            sessionStorage.setItem("email", resultado.data.email);
+            handleNavigate("/home")
+        })
+        .catch(() => {});
+    }
+
+    const handleVisitante = () => {
+        visitorUser(globalContext)
+        .then((resultado) => {
+            globalContext.showMessage(Message.Success, "Acessando como visitante");
+            sessionStorage.setItem("token", resultado.data.token);
+            sessionStorage.setItem("role", resultado.data.role);
+            sessionStorage.setItem("email", resultado.data.email);
+            handleNavigate("/home")
+        })
+        .catch(() => {});
     }
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -36,6 +66,10 @@ const Login = () => {
     const handleNavigate = (url) => {
         navigate(url)
     }
+
+    useEffect(() => {
+        sessionStorage.clear();
+    }, [])
     
   return (
     <Grid container style={{ height: '100vh' }}>
@@ -105,7 +139,7 @@ const Login = () => {
                         </Typography>
                     </Grid>
                     <Grid item xs={12}>
-                        <Button onClick={() => handleNavigate("/home")} variant="text">Continuar como visitante</Button>
+                        <Button onClick={() => handleVisitante()} variant="text">Continuar como visitante</Button>
                     </Grid>
                 </Grid>
             </Grid>

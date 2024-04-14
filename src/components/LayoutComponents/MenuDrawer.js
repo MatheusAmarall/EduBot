@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -25,6 +25,9 @@ import {
 } from '@mui/material'
 import MuiAppBar from '@mui/material/AppBar';
 import { deepOrange } from '@mui/material/colors';
+import AppContext from '../../context/context';
+import { logoutUser } from '../../middlewares/AuthMiddleware';
+import { Message } from '../../enums/messageEnum';
 
 const drawerWidth = 300;
 
@@ -84,7 +87,10 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function MenuDrawer({ children }) {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState("");
+
+  const globalContext = useContext(AppContext);
 
   const navigate = useNavigate();
 
@@ -97,12 +103,31 @@ export default function MenuDrawer({ children }) {
   };
 
   const handleLogout = () => {
+    const dadosLogout = {
+      email: userInfo.email
+    };
+
+    logoutUser(dadosLogout, globalContext)
+    .then(() => {
+      globalContext.showMessage(Message.Success, "Deslogado com sucesso");
+      navigate("/")
+    })
+    .catch(() => {});
+    
+  }
+
+  const handleLogin = () => {
     navigate("/")
   }
 
   const loggedUser = () => {
-    return false;
+    return userInfo.email;
   }
+
+  useEffect(() => {
+    const userInfo = globalContext.returnUserInfo();
+    setUserInfo(userInfo)
+  }, [setUserInfo, globalContext])
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -142,7 +167,7 @@ export default function MenuDrawer({ children }) {
             <ListItemAvatar>
               <Avatar alt="Profile Picture" />
             </ListItemAvatar>
-            <ListItemText primary="Pedro da Silva" secondary="4º série B" />
+            <ListItemText primary={userInfo.email ? userInfo.email.split("@")[0] : "Visitante"} />
           </ListItem>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
@@ -170,7 +195,7 @@ export default function MenuDrawer({ children }) {
           </Grid>
           <Grid item>
             <ListItem>
-              <ListItemButton style={{ textAlign: 'center' }} onClick={handleLogout}> 
+              <ListItemButton style={{ textAlign: 'center' }} onClick={loggedUser() ? handleLogout : handleLogin}> 
                 <ListItemIcon>
                   {loggedUser()
                     ? 

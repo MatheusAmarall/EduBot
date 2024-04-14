@@ -116,11 +116,12 @@ const getErrorList = (error) => {
     if (error.message === 'Network Error') {
       return 'API não disponível, por favor entre em contato com o suporte';
     }
-    else if (error.message !== undefined) {
+    else if (error.response.data.errors) {
+      return error.response.data.errors[0];
+    }
+    else {
       return error.message;
     }
-
-    return '';
 };
 
 const getAxiosInstance = (endpoint) => {

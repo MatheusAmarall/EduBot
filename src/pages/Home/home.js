@@ -29,10 +29,8 @@ const Home = () => {
     setMensagens(prevState => [...prevState, mensagemUsuario]);
     setMensagemDigitada("")
 
-    sendMessage(mensagem, globalContext, true)
+    sendMessage(mensagem, globalContext)
       .then((resultado) => {
-        console.log(resultado.data)
-        
         resultado.data.forEach((mensagem) => {
           const mensagemBot = {
             nomeUsuario: "EduBot",
