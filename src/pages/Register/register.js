@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import {
     TextField,
     FormControl,
@@ -15,6 +15,9 @@ import {
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router-dom';
+import { registerUser } from '../../middlewares/AuthMiddleware';
+import AppContext from '../../context/context';
+import { Message } from '../../enums/messageEnum';
 
 const Register = () => {
     const [isCoordenador, setIsCoordenador] = useState(false);
@@ -25,10 +28,25 @@ const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    const globalContext = useContext(AppContext);
+
     const navigate = useNavigate();
 
     const handleRegister = () => {
-        console.log("login", email, matricula, senha, confirmaSenha)
+        const dadosRegister = {
+            isAdmin: isCoordenador,
+            matricula: matricula,
+            email: email,
+            password: senha,
+            confirmPassword: confirmaSenha,
+        };
+      
+        registerUser(dadosRegister, globalContext)
+        .then((resultado) => {
+            globalContext.showMessage(Message.Success, resultado.data);
+            handleNavigate("/")
+        })
+        .catch(() => {});
     }
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -42,6 +60,11 @@ const Register = () => {
     const handleNavigate = (url) => {
         navigate(url)
     }
+
+    useEffect(() => {
+        sessionStorage.clear();
+    }, [])
+
   return (
     <Grid container style={{ height: "100vh" }}>
         <Grid item xs={12} style={{ backgroundColor: "#5B71EE", display: "flex", alignItems: "center", justifyContent: "center" }}>
