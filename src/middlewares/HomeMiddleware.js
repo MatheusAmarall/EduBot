@@ -1,4 +1,4 @@
-import { post } from '../api/baseApi';
+import { post, get } from '../api/baseApi';
 import { Endpoint } from '../enums/apiEnum';
 
 export const sendMessage = async (
@@ -7,4 +7,12 @@ export const sendMessage = async (
 ) => {
   const url = `/api/Bot/SendMessage`;
   return await post(url, message, context, Endpoint.Bff);
+};
+
+export const getMessages = async (
+  email,
+  context,
+) => {
+  const url = `/api/Bot/GetMessages?email=${email}`;
+  return await get(url, context, Endpoint.Bff);
 };

@@ -1,23 +1,31 @@
 import { Grid, Avatar, List, ListItem, ListItemAvatar, ListItemText, IconButton, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material'
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect, useRef } from 'react'
 import MenuDrawer from '../../components/LayoutComponents/MenuDrawer';
 import SendIcon from '@mui/icons-material/Send';
 import AppContext from '../../context/context';
-import { sendMessage } from '../../middlewares/HomeMiddleware';
+import { sendMessage, getMessages } from '../../middlewares/HomeMiddleware';
 
 const Home = () => {
   const [mensagens, setMensagens] = useState([]);
+  const [historicoMensagens, setHistoricoMensagens] = useState(null);
   const [mensagemDigitada, setMensagemDigitada] = useState("");
 
   const globalContext = useContext(AppContext);
+  const userInfo = globalContext.returnUserInfo();
+
+  const listRef = useRef(null);
 
   const isSentByCurrentUser = (user) => {
-    return user === "Matheus Amaral"
+    return user === userInfo.email || user.toLowerCase() === "visitante"
+  }
+
+  const isSentByUser = (event) => {
+    return event === "user"
   }
 
   const handleSendMessage = () =>{
     const mensagem = {
-      sender: "Matheus Amaral",
+      sender: userInfo.email !== "" ? userInfo.email : "Visitante",
       message: mensagemDigitada
     };
 
@@ -47,11 +55,61 @@ const Home = () => {
       handleSendMessage();
     }
   };
+  
+  const scrollToBottom = () => {
+    if (listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    }
+  };
+
+  const recuperarHistoricoMensagens = () => {
+    getMessages(userInfo.email, globalContext)
+      .then((resultado) => {
+        setHistoricoMensagens(resultado)
+      })
+      .catch(() => {});
+  }
+
+  useEffect(() => {
+    if(userInfo.role.toLowerCase() !== "visitante") {
+      recuperarHistoricoMensagens();
+    }
+  }, [])
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [historicoMensagens, mensagens]);
+
   return (
     <MenuDrawer>
       <Grid container>
-        <Grid item xs={12} style={{ flexGrow: 1, overflow: "auto", height: "80vh" }}>
+        <Grid ref={listRef} item xs={12} style={{ flexGrow: 1, overflow: "auto", height: "80vh" }}>
           <List style={{ display: 'flex', flexDirection: 'column' }}>
+            {historicoMensagens && historicoMensagens.events.map((message, index) => (
+              message.event === "user" || message.event === "bot" ? (
+              <ListItem
+                key={index}
+                style={{
+                  textAlign: isSentByUser(message.event) ? 'right' : 'left',
+                  flexDirection: isSentByUser(message.event) ? 'row-reverse' : 'row'
+                }}
+              >
+                <ListItemAvatar style={{
+                  display: 'flex',
+                  justifyContent: isSentByUser(message.event) ? 'flex-end' : 'flex-start'
+                }}>
+                  <Avatar alt="Profile Picture" />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={isSentByUser(message.event) ? historicoMensagens.senderId.split("@")[0] : "EduBot"}
+                  secondary={message.text}
+                  style={{ textAlign: isSentByUser(message.event) ? 'right' : 'left' }}
+                />
+              </ListItem>
+              )
+              :
+              <React.Fragment key={index}></React.Fragment>
+            ))}
             {mensagens.map((message, index) => (
               <ListItem
                 key={index}
@@ -67,7 +125,7 @@ const Home = () => {
                   <Avatar alt="Profile Picture" />
                 </ListItemAvatar>
                 <ListItemText
-                  primary={message.nomeUsuario}
+                  primary={message.nomeUsuario.includes("@") ? message.nomeUsuario.split("@")[0] : message.nomeUsuario}
                   secondary={message.texto}
                   style={{ textAlign: isSentByCurrentUser(message.nomeUsuario) ? 'right' : 'left' }}
                 />
@@ -76,7 +134,6 @@ const Home = () => {
           </List>
         </Grid>
         <Grid item xs={12}>
-
           <FormControl fullWidth variant="outlined">
             <InputLabel htmlFor="txt-message">Digite sua mensagem</InputLabel>
             <OutlinedInput
