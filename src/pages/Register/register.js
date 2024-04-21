@@ -33,6 +33,22 @@ const Register = () => {
     const navigate = useNavigate();
 
     const handleRegister = () => {
+        if(email === "") {
+            globalContext.showMessage(Message.Error, "O campo email é obrigatório");
+            return;
+        }
+        if(matricula === "") {
+            globalContext.showMessage(Message.Error, "O campo matrícula é obrigatório");
+            return;
+        }
+        if(senha === "") {
+            globalContext.showMessage(Message.Error, "O campo senha é obrigatório");
+            return;
+        }
+        if(confirmaSenha === "") {
+            globalContext.showMessage(Message.Error, "O campo confirmação de senha é obrigatório");
+            return;
+        }
         const dadosRegister = {
             isAdmin: isCoordenador,
             matricula: matricula,

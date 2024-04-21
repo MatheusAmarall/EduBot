@@ -173,27 +173,29 @@ export default function MenuDrawer({ children }) {
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </DrawerHeader>
-        <Grid container direction="column" height="100%" justifyContent="space-between">
-          <Grid item>
-            <ListItem>
-              <ListItemButton style={{ border: '1px solid black', borderRadius: '5px', textAlign: 'center' }}>
-                <ListItemText primary="Criar nova conversa" />
-              </ListItemButton>
-            </ListItem>
-            <Root>
-              <Divider>Histórico de atendimentos</Divider>
-            </Root>
-            <List>
-              {['All mail', 'Trash', 'Spam'].map((text, index) => (
-                <ListItem key={index}>
-                  <ListItemButton>
-                    <ListItemText primary="Matheus Amaral" secondary="Informações sobre matrícula" />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Grid>
-          <Grid item>
+        <Grid container direction="column" height="100%">
+          {userInfo.role === "Admin" ? (
+            <Grid item style={{ flexGrow: 1 }}>
+              <ListItem>
+                <ListItemButton style={{ border: '1px solid black', borderRadius: '5px', textAlign: 'center' }}>
+                  <ListItemText primary="Criar nova conversa" />
+                </ListItemButton>
+              </ListItem>
+              <Root>
+                <Divider>Histórico de atendimentos</Divider>
+              </Root>
+              <List>
+                {['All mail', 'Trash', 'Spam'].map((text, index) => (
+                  <ListItem key={index}>
+                    <ListItemButton>
+                      <ListItemText primary="Matheus Amaral" secondary="Informações sobre matrícula" />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Grid>
+          ) : <></>}
+          <Grid item style={{ marginTop: 'auto' }}>
             <ListItem>
               <ListItemButton style={{ textAlign: 'center' }} onClick={loggedUser() ? handleLogout : handleLogin}> 
                 <ListItemIcon>

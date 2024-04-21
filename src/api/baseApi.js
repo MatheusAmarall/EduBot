@@ -134,7 +134,10 @@ const getAxiosInstance = (endpoint) => {
 };
 
 const axiosConfig = async () => {
-    return {
-      headers: {},
-    };
+  const token = sessionStorage.getItem("token");
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
 };
