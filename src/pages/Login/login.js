@@ -29,6 +29,15 @@ const Login = () => {
     const navigate = useNavigate();
 
     const handleLogin = () => {
+        if(login === "") {
+            globalContext.showMessage(Message.Error, "O campo login é obrigatório");
+            return;
+        }
+        if(senha === "") {
+            globalContext.showMessage(Message.Error, "O campo senha é obrigatório");
+            return;
+        }
+        
         const dadosLogin = {
             email: login,
             password: senha
