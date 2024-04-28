@@ -1,14 +1,17 @@
-import { Grid, Avatar, List, ListItem, ListItemAvatar, ListItemText, IconButton, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material'
+import { Grid, Avatar, Typography, List, ListItem, ListItemAvatar, ListItemText, Button, IconButton, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material'
 import React, { useState, useContext, useEffect, useRef } from 'react'
 import MenuDrawer from '../../components/LayoutComponents/MenuDrawer';
 import SendIcon from '@mui/icons-material/Send';
 import AppContext from '../../context/context';
 import { sendMessage, getMessages } from '../../middlewares/HomeMiddleware';
+import pdfMaternal from '../../assets/files/maternal.pdf';
+import pdfPreEscola from '../../assets/files/preescola.pdf';
 
 const Home = () => {
   const [mensagens, setMensagens] = useState([]);
   const [historicoMensagens, setHistoricoMensagens] = useState(null);
   const [mensagemDigitada, setMensagemDigitada] = useState("");
+  const [opcaoMensagemSelecionada, setOpcaoMensagemSelecionada] = useState("");
 
   const globalContext = useContext(AppContext);
   const userInfo = globalContext.returnUserInfo();
@@ -16,7 +19,7 @@ const Home = () => {
   const listRef = useRef(null);
 
   const isSentByCurrentUser = (user) => {
-    return user === userInfo.email || user.toLowerCase() === "visitante"
+    return user === userInfo.email || (user && user.toLowerCase() === "visitante")
   }
 
   const isSentByUser = (event) => {
@@ -26,7 +29,7 @@ const Home = () => {
   const handleSendMessage = () =>{
     const mensagem = {
       sender: userInfo.email !== "" ? userInfo.email : "Visitante",
-      message: mensagemDigitada
+      message: opcaoMensagemSelecionada !== "" ? opcaoMensagemSelecionada : mensagemDigitada
     };
 
     const mensagemUsuario = {
@@ -36,15 +39,24 @@ const Home = () => {
 
     setMensagens(prevState => [...prevState, mensagemUsuario]);
     setMensagemDigitada("")
+    setOpcaoMensagemSelecionada("")
 
     sendMessage(mensagem, globalContext)
       .then((resultado) => {
+        console.log("resultado", resultado)
         resultado.data.forEach((mensagem) => {
           const mensagemBot = {
             nomeUsuario: "EduBot",
-            texto: mensagem.text
+            texto: mensagem.text,
+            buttons: mensagem.buttons
           }
           setMensagens(prevState => [...prevState, mensagemBot]);
+          if(mensagem.text.toLowerCase().includes("cardápio da pré-escola")) {
+            downloadCardapio("pre-escola")
+          }
+          else if(mensagem.text.toLowerCase().includes("cardápio do maternal")) {
+            downloadCardapio("maternal")
+          }
         })
       })
       .catch(() => {});
@@ -70,8 +82,45 @@ const Home = () => {
       .catch(() => {});
   }
 
+  const handleSelecionarOpcao = (opcao, index) => {
+    setOpcaoMensagemSelecionada(opcao)
+
+    setMensagens(prevMensagens => prevMensagens.map((mensagem, i) => {
+      if (i === index) {
+        return { ...mensagem, buttons: [] };
+      }
+      return mensagem;
+    }));
+  }
+
+  const renderMessageText = (texto) => {
+    const regex = /(https?:\/\/[^\s]+)/g;
+    const parts = texto.split(regex);
+
+    return parts.map((part, index) => {
+      if (part.match(regex)) {
+        return (
+          <a key={index} href={part} target="_blank" rel="noopener noreferrer">
+            {part}
+          </a>
+        );
+      } else {
+        return <React.Fragment key={index}>{part}</React.Fragment>;
+      }
+    });
+  };
+
+  const downloadCardapio = (tipoCardapio) => {
+    const link = document.createElement('a');
+    link.href = tipoCardapio === "maternal" ? pdfMaternal : pdfPreEscola;
+    link.download = tipoCardapio === "maternal" ? 'maternal.pdf' : 'pre-escola.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
-    if(userInfo.role.toLowerCase() !== "visitante") {
+    if(userInfo.role && userInfo.role.toLowerCase() !== "visitante") {
       recuperarHistoricoMensagens();
     }
   }, [])
@@ -80,10 +129,23 @@ const Home = () => {
     scrollToBottom();
   }, [historicoMensagens, mensagens]);
 
+  useEffect(() => {
+    if(opcaoMensagemSelecionada !== "") {
+      handleSendMessage()
+    }
+  }, [opcaoMensagemSelecionada])
+
   return (
     <MenuDrawer>
       <Grid container>
         <Grid ref={listRef} item xs={12} style={{ flexGrow: 1, overflow: "auto", height: "80vh" }}>
+          {!historicoMensagens && mensagens.length === 0 && (
+            <Grid item xs={12} mt={5} style={{ display: 'flex', alignItems: 'center',justifyContent: 'center', color: '#5B71EE' }}>
+              <Grid item xs={8}>
+                <Typography fontSize={20} fontStyle="italic" style={{ textAlign: 'center', userSelect: 'none' }}>Seja bem-vindo ao EduBot. Para mais informações, acesse o botão de ajuda, localizado no canto superior direito.</Typography>
+              </Grid>
+            </Grid>
+          )}
           <List style={{ display: 'flex', flexDirection: 'column' }}>
             {historicoMensagens && historicoMensagens.events.map((message, index) => (
               message.event === "user" || message.event === "bot" ? (
@@ -102,7 +164,7 @@ const Home = () => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={isSentByUser(message.event) ? historicoMensagens.senderId.split("@")[0] : "EduBot"}
-                  secondary={message.text}
+                  secondary={renderMessageText(message.text)}
                   style={{ textAlign: isSentByUser(message.event) ? 'right' : 'left' }}
                 />
               </ListItem>
@@ -111,6 +173,7 @@ const Home = () => {
               <React.Fragment key={index}></React.Fragment>
             ))}
             {mensagens.map((message, index) => (
+              <React.Fragment key={index}>
               <ListItem
                 key={index}
                 style={{
@@ -126,10 +189,20 @@ const Home = () => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={message.nomeUsuario.includes("@") ? message.nomeUsuario.split("@")[0] : message.nomeUsuario}
-                  secondary={message.texto}
+                  secondary={renderMessageText(message.texto)}
                   style={{ textAlign: isSentByCurrentUser(message.nomeUsuario) ? 'right' : 'left' }}
                 />
               </ListItem>
+              {message.buttons && message.buttons.length > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                  {message.buttons.map((button, buttonIndex) => (
+                    <Button key={buttonIndex} variant="text" onClick={() => handleSelecionarOpcao(button.payload, index)}>
+                      {button.title}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              </React.Fragment>
             ))}
           </List>
         </Grid>

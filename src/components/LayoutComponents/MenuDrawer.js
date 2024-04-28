@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -21,15 +22,29 @@ import {
   CssBaseline,
   Toolbar,
   Divider,
-  ListItemIcon
+  ListItemIcon,
+  Dialog,
+  DialogTitle,
+  DialogContent
 } from '@mui/material'
 import MuiAppBar from '@mui/material/AppBar';
+import CloseIcon from '@mui/icons-material/Close';
 import { deepOrange } from '@mui/material/colors';
 import AppContext from '../../context/context';
 import { logoutUser } from '../../middlewares/AuthMiddleware';
 import { Message } from '../../enums/messageEnum';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 const drawerWidth = 300;
+
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(2),
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(1),
+  },
+}));
 
 const Root = styled('div')(({ theme }) => ({
   width: '100%',
@@ -89,6 +104,7 @@ export default function MenuDrawer({ children }) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [userInfo, setUserInfo] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
 
   const globalContext = useContext(AppContext);
 
@@ -100,6 +116,13 @@ export default function MenuDrawer({ children }) {
 
   const handleDrawerClose = () => {
     setOpen(false);
+  };
+
+  const handleDialogOpen = () => {
+    setOpenDialog(true);
+  };
+  const handleDialogClose = () => {
+    setOpenDialog(false);
   };
 
   const handleLogout = () => {
@@ -143,9 +166,16 @@ export default function MenuDrawer({ children }) {
           >
             <MenuIcon />
           </IconButton>
-          <Grid container>
-            <Avatar sx={{ bgcolor: deepOrange[500] }} variant="square">A</Avatar>
-            <Typography color="white" fontSize={24} style={{ marginLeft: 10 }}>EDU.BOT</Typography>
+          <Grid container justifyContent="space-between" alignItems="center">
+            <Grid item display="flex">
+              <Avatar sx={{ bgcolor: deepOrange[500] }} variant="square">A</Avatar>
+              <Typography color="white" fontSize={24} style={{ marginLeft: 10 }}>EDU.BOT</Typography>
+            </Grid>
+            <Grid item>
+              <IconButton color="primary" aria-label="informação" onClick={handleDialogOpen}>
+                <InfoOutlinedIcon sx={{ fontSize: 26 }} />
+              </IconButton>
+            </Grid>
           </Grid>
         </Toolbar>
       </AppBar>
@@ -177,7 +207,7 @@ export default function MenuDrawer({ children }) {
           {userInfo.role === "Admin" ? (
             <Grid item style={{ flexGrow: 1 }}>
               <ListItem>
-                <ListItemButton style={{ border: '1px solid black', borderRadius: '5px', textAlign: 'center' }}>
+                <ListItemButton color="primary" style={{ borderRadius: '5px', textAlign: 'center' }}>
                   <ListItemText primary="Criar nova conversa" />
                 </ListItemButton>
               </ListItem>
@@ -215,6 +245,58 @@ export default function MenuDrawer({ children }) {
       <Main open={open}>
         <Grid container marginTop={5}>
           {children}
+          <BootstrapDialog
+            onClose={handleDialogClose}
+            aria-labelledby="customized-dialog-title"
+            open={openDialog}
+          >
+            <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+              Ajuda
+            </DialogTitle>
+            <IconButton
+              aria-label="close"
+              onClick={handleDialogClose}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                color: (theme) => theme.palette.grey[500],
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+            <DialogContent dividers>
+              <Typography gutterBottom>
+                Funcionalidades disponíveis no EduBot.
+              </Typography>
+              <List>
+                <ListItem>
+                  <ListItemIcon>
+                    <AssignmentIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Lista de materiais" />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <AssignmentIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Lista de matrícula" />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <AssignmentIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Merenda" />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <AssignmentIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Lista de espera" />
+                </ListItem>
+              </List>
+            </DialogContent>
+          </BootstrapDialog>
         </Grid>
       </Main>
     </Box>
