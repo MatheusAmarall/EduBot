@@ -25,7 +25,8 @@ import {
   ListItemIcon,
   Dialog,
   DialogTitle,
-  DialogContent
+  DialogContent,
+  Button,
 } from '@mui/material'
 import MuiAppBar from '@mui/material/AppBar';
 import CloseIcon from '@mui/icons-material/Close';
@@ -34,6 +35,7 @@ import AppContext from '../../context/context';
 import { logoutUser } from '../../middlewares/AuthMiddleware';
 import { Message } from '../../enums/messageEnum';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import Parametrizacao from './Parametrizacao';
 
 const drawerWidth = 300;
 
@@ -105,6 +107,7 @@ export default function MenuDrawer({ children }) {
   const [open, setOpen] = useState(false);
   const [userInfo, setUserInfo] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [openParametrizacao, setOpenParametrizacao] = useState(false);
 
   const globalContext = useContext(AppContext);
 
@@ -121,8 +124,13 @@ export default function MenuDrawer({ children }) {
   const handleDialogOpen = () => {
     setOpenDialog(true);
   };
+  
   const handleDialogClose = () => {
     setOpenDialog(false);
+  };
+
+  const handleOpenParametrizacao = () => {
+    setOpenParametrizacao(true);
   };
 
   const handleLogout = () => {
@@ -171,7 +179,13 @@ export default function MenuDrawer({ children }) {
               <Avatar sx={{ bgcolor: deepOrange[500] }} variant="square">A</Avatar>
               <Typography color="white" fontSize={24} style={{ marginLeft: 10 }}>EDU.BOT</Typography>
             </Grid>
+            
             <Grid item>
+              {
+                userInfo.role === 'Admin' && (
+                  <Button variant="text" onClick={handleOpenParametrizacao}>Parametrização</Button>
+                )
+              }
               <IconButton color="primary" aria-label="informação" onClick={handleDialogOpen}>
                 <InfoOutlinedIcon sx={{ fontSize: 26 }} />
               </IconButton>
@@ -297,6 +311,8 @@ export default function MenuDrawer({ children }) {
               </List>
             </DialogContent>
           </BootstrapDialog>
+
+          <Parametrizacao openDialog={openParametrizacao} setOpenDialog={setOpenParametrizacao} />
         </Grid>
       </Main>
     </Box>
