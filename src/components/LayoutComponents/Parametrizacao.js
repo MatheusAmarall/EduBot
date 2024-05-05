@@ -255,7 +255,7 @@ const Parametrizacao = ({openDialog, setOpenDialog}) => {
                                         </IconButton>
                                         }
                                     >
-                                        <ListItemText primary={`Line item ${value}`} />
+                                        <ListItemText primary={value} />
                                     </ListItem>
                                     ))}
                                 </List>
