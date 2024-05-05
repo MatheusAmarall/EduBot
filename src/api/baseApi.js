@@ -3,7 +3,7 @@ import { Endpoint } from '../enums/apiEnum';
 import { Message } from '../enums/messageEnum';
 
 let _context;
-const timeout = 300000;
+const timeout = 800000;
 
 const apiBff = axios.create({
   baseURL: Endpoint.Bff,
