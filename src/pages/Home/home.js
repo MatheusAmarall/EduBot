@@ -160,7 +160,9 @@ const Home = () => {
                   display: 'flex',
                   justifyContent: isSentByUser(message.event) ? 'flex-end' : 'flex-start'
                 }}>
-                  <Avatar alt="Profile Picture" />
+                  {isSentByUser(message.event)
+                  ? <Avatar alt="Profile Picture" /> 
+                  : <img src={logoEduBot} alt="EDU.BOT" style={{ width: 40, height: 40, borderRadius: '50%', marginRight: 10 }} />}
                 </ListItemAvatar>
                 <ListItemText
                   primary={isSentByUser(message.event) ? historicoMensagens.senderId.split("@")[0] : "EduBot"}
@@ -188,7 +190,7 @@ const Home = () => {
                   
                   {isSentByCurrentUser(message.nomeUsuario)
                   ? <Avatar alt="Profile Picture" /> 
-                  : <img src={logoEduBot} alt="EDU.BOT" style={{ width: 50, height: 50, borderRadius: '50%', marginRight: 10 }} />}
+                  : <img src={logoEduBot} alt="EDU.BOT" style={{ width: 40, height: 40, borderRadius: '50%', marginRight: 10 }} />}
                 </ListItemAvatar>
                 <ListItemText
                   primary={message.nomeUsuario.includes("@") ? message.nomeUsuario.split("@")[0] : message.nomeUsuario}

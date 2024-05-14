@@ -175,8 +175,8 @@ export default function MenuDrawer({ children }) {
             <MenuIcon />
           </IconButton>
           <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item display="flex">
-              <img src={logoEduBot} alt="EDU.BOT" style={{ width: 50, height: 50, marginRight: 10 }} />
+            <Grid item display="flex" style={{placeItems: "center"}}>
+              <img src={logoEduBot} alt="EDU.BOT" style={{ width: 40, height: 40, marginRight: 10 }} />
               <Typography color="white" fontSize={24} style={{ marginLeft: 10 }}>EDU.BOT</Typography>
             </Grid>
             
