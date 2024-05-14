@@ -30,12 +30,12 @@ import {
 } from '@mui/material'
 import MuiAppBar from '@mui/material/AppBar';
 import CloseIcon from '@mui/icons-material/Close';
-import { deepOrange } from '@mui/material/colors';
 import AppContext from '../../context/context';
 import { logoutUser } from '../../middlewares/AuthMiddleware';
 import { Message } from '../../enums/messageEnum';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import Parametrizacao from './Parametrizacao';
+import logoEduBot from '../../assets/img/logo.png';
 
 const drawerWidth = 300;
 
@@ -175,8 +175,8 @@ export default function MenuDrawer({ children }) {
             <MenuIcon />
           </IconButton>
           <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item display="flex">
-              <Avatar sx={{ bgcolor: deepOrange[500] }} variant="square">A</Avatar>
+            <Grid item display="flex" style={{placeItems: "center"}}>
+              <img src={logoEduBot} alt="EDU.BOT" style={{ width: 40, height: 40, marginRight: 10 }} />
               <Typography color="white" fontSize={24} style={{ marginLeft: 10 }}>EDU.BOT</Typography>
             </Grid>
             
