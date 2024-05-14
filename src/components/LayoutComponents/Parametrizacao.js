@@ -55,6 +55,7 @@ const Parametrizacao = ({openDialog, setOpenDialog}) => {
     const handleCloseDialog = () => {
         setPerguntaDigitada("")
         setRespostaDigitada("")
+        setTituloPergunta("")
         setPerguntas([])
         setRespostas([])
         setActiveStep(0)

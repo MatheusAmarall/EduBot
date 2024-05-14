@@ -222,21 +222,12 @@ export default function MenuDrawer({ children }) {
             <Grid item style={{ flexGrow: 1 }}>
               <ListItem>
                 <ListItemButton color="primary" style={{ borderRadius: '5px', textAlign: 'center' }}>
-                  <ListItemText primary="Criar nova conversa" />
+                  <ListItemText primary="Chat EduBot" />
                 </ListItemButton>
               </ListItem>
               <Root>
                 <Divider>Histórico de atendimentos</Divider>
               </Root>
-              <List>
-                {['All mail', 'Trash', 'Spam'].map((text, index) => (
-                  <ListItem key={index}>
-                    <ListItemButton>
-                      <ListItemText primary="Matheus Amaral" secondary="Informações sobre matrícula" />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
             </Grid>
           ) : <></>}
           <Grid item style={{ marginTop: 'auto' }}>
