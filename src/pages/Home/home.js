@@ -6,6 +6,7 @@ import AppContext from '../../context/context';
 import { sendMessage, getMessages } from '../../middlewares/HomeMiddleware';
 import pdfMaternal from '../../assets/files/maternal.pdf';
 import pdfPreEscola from '../../assets/files/preescola.pdf';
+import logoEduBot from '../../assets/img/logo.png';
 
 const Home = () => {
   const [mensagens, setMensagens] = useState([]);
@@ -43,7 +44,6 @@ const Home = () => {
 
     sendMessage(mensagem, globalContext)
       .then((resultado) => {
-        console.log("resultado", resultado)
         resultado.data.forEach((mensagem) => {
           const mensagemBot = {
             nomeUsuario: "EduBot",
@@ -185,7 +185,10 @@ const Home = () => {
                   display: 'flex',
                   justifyContent: isSentByCurrentUser(message.nomeUsuario) ? 'flex-end' : 'flex-start'
                 }}>
-                  <Avatar alt="Profile Picture" />
+                  
+                  {isSentByCurrentUser(message.nomeUsuario)
+                  ? <Avatar alt="Profile Picture" /> 
+                  : <img src={logoEduBot} alt="EDU.BOT" style={{ width: 50, height: 50, borderRadius: '50%', marginRight: 10 }} />}
                 </ListItemAvatar>
                 <ListItemText
                   primary={message.nomeUsuario.includes("@") ? message.nomeUsuario.split("@")[0] : message.nomeUsuario}
