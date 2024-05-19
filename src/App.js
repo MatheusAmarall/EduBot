@@ -15,6 +15,7 @@ import { Message } from './enums/messageEnum';
 
 function App() {
   const [chatAtivo, setChatAtivo] = useState("edubot");
+  const [conversaUsuario, setConversaUsuario] = useState("");
   const { enqueueSnackbar } = useSnackbar();
 
   const showMessage = (variant, message) => {
@@ -38,6 +39,10 @@ function App() {
     if(chatAtivo !== chat) {
       setChatAtivo(chat)
     }
+  }
+
+  const selecionaConversaUsuario = (nomeUsuario) => {
+    setConversaUsuario(nomeUsuario)
   }
 
   const createHubConnection = async () => {
@@ -85,7 +90,9 @@ function App() {
     isSentByUser,
     renderMessageText,
     selecionaChatAtivo,
-    chatAtivo
+    chatAtivo,
+    selecionaConversaUsuario,
+    conversaUsuario
   };
   return (
     <>

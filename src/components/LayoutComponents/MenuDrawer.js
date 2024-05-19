@@ -38,6 +38,7 @@ import Parametrizacao from './Parametrizacao';
 import logoEduBot from '../../assets/img/logo.png';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import { getAllMessages } from '../../middlewares/HomeMiddleware';
 
 const drawerWidth = 300;
 
@@ -110,6 +111,7 @@ export default function MenuDrawer({ children }) {
   const [userInfo, setUserInfo] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [openParametrizacao, setOpenParametrizacao] = useState(false);
+  const [historicoConversas, setHistoricoConversas] = useState([])
 
   const globalContext = useContext(AppContext);
 
@@ -161,10 +163,29 @@ export default function MenuDrawer({ children }) {
     globalContext.selecionaChatAtivo(chat)
   }
 
+  const handleSelecionaConversaUsuario = (nomeUsuario) => {
+    globalContext.selecionaConversaUsuario(nomeUsuario)
+    handleSelecionaChatAtivo("coordenador")
+  }
+
+  const handleGetAllMessages = () => {
+    getAllMessages(globalContext)
+    .then((res) => {
+      setHistoricoConversas(res)
+    })
+    .catch(() => {});
+  }
+
   useEffect(() => {
     const userInfo = globalContext.returnUserInfo();
     setUserInfo(userInfo)
   }, [setUserInfo, globalContext])
+
+  useEffect(() => {
+    if(userInfo !== "" && userInfo.role === "Admin") {
+      handleGetAllMessages();
+    }
+  }, [userInfo])
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -246,9 +267,25 @@ export default function MenuDrawer({ children }) {
               </ListItem>
             )}
             {userInfo.role === "Admin" && (
-              <Root>
-                <Divider>Histórico de atendimentos</Divider>
-              </Root>
+              <>
+                <Root>
+                  <Divider>Histórico de atendimentos</Divider>
+                </Root>
+                <List>
+                  {historicoConversas.map((conversa, index) => (
+                    <ListItem key={index}>
+                      <ListItemButton onClick={() => handleSelecionaConversaUsuario(conversa.nomeUsuario)}>
+                        <ListItemIcon>
+                          <Avatar alt="Profile Picture" />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary={conversa.nomeUsuario.split("@")[0]}
+                          secondary={conversa.mensagens[conversa.mensagens.length - 1].body} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              </>
             )}
           </Grid>
           <Grid item style={{ marginTop: 'auto' }}>

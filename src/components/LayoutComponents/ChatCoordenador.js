@@ -12,14 +12,18 @@ const ChatCoordenador = ({mensagemDigitada, setMensagemDigitada, scrollToBottom,
   const userInfo = globalContext.returnUserInfo();
 
   const handleSendMessage = () =>{
-    const mensagem = {
-      nomeUsuario: userInfo.email,
-      mensagem: mensagemDigitada
-    };
-
-    setMensagemDigitada("")
-
-    hubConnection.invoke("SendMessage", mensagem)
+    if(hubConnection) {
+      const mensagem = {
+        nomeUsuario: globalContext.conversaUsuario !== "" ? globalContext.conversaUsuario : userInfo.email,
+        mensagem: mensagemDigitada,
+        role: userInfo.role,
+        sender: userInfo.email
+      };
+  
+      setMensagemDigitada("")
+  
+      hubConnection.invoke("SendMessage", mensagem)
+    }
   }
 
   const recuperarHistoricoMensagens = async () => {
@@ -31,8 +35,9 @@ const ChatCoordenador = ({mensagemDigitada, setMensagemDigitada, scrollToBottom,
             await conn.start();
 
             conn.on('ReceivedMessage', (msg) => {
-                console.log("entrou aqui")
+              if(globalContext.isSentByCurrentUser(msg.nomeUsuario) || msg.role === "Admin" || globalContext.conversaUsuario !== "") {
                 setHistoricoMensagens(prevState => [...prevState, msg]);
+              }
             });
 
             setHubConnection(conn);
@@ -42,7 +47,6 @@ const ChatCoordenador = ({mensagemDigitada, setMensagemDigitada, scrollToBottom,
   };
 
   useEffect(() => {
-    console.log("entrou aqui para registar")
     recuperarHistoricoMensagens();
 
     return () => {
@@ -66,23 +70,23 @@ const ChatCoordenador = ({mensagemDigitada, setMensagemDigitada, scrollToBottom,
                     <ListItem
                     key={index}
                     style={{
-                        textAlign: globalContext.isSentByCurrentUser(message.nomeUsuario) ? 'right' : 'left',
-                        flexDirection: globalContext.isSentByCurrentUser(message.nomeUsuario) ? 'row-reverse' : 'row'
+                        textAlign: globalContext.isSentByCurrentUser(message.sender) ? 'right' : 'left',
+                        flexDirection: globalContext.isSentByCurrentUser(message.sender) ? 'row-reverse' : 'row'
                     }}
                     >
                     <ListItemAvatar style={{
                         display: 'flex',
-                        justifyContent: globalContext.isSentByCurrentUser(message.nomeUsuario) ? 'flex-end' : 'flex-start'
+                        justifyContent: globalContext.isSentByCurrentUser(message.sender) ? 'flex-end' : 'flex-start'
                     }}>
                         
-                        {globalContext.isSentByCurrentUser(message.nomeUsuario)
+                        {globalContext.isSentByCurrentUser(message.sender)
                         ? <Avatar alt="Profile Picture" /> 
                         : <img src={logoEduBot} alt="EDU.BOT" style={{ width: 40, height: 40, borderRadius: '50%', marginRight: 10 }} />}
                     </ListItemAvatar>
                     <ListItemText
-                        primary={message.nomeUsuario}
+                        primary={message.sender}
                         secondary={globalContext.renderMessageText(message.mensagem)}
-                        style={{ textAlign: globalContext.isSentByCurrentUser(message.nomeUsuario) ? 'right' : 'left' }}
+                        style={{ textAlign: globalContext.isSentByCurrentUser(message.sender) ? 'right' : 'left' }}
                     />
                     </ListItem>
                     </React.Fragment>
