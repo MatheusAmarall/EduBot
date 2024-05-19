@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import { ThemeProvider } from '@mui/material';
 import './App.css';
 import Home from './pages/Home/home';
@@ -8,8 +9,12 @@ import { theme } from './theme/theme';
 import AppContext from './context/context';
 import { useSnackbar } from 'notistack';
 import PrivateRoute from './helpers/PrivateRoute';
+import { HubConnectionBuilder } from '@microsoft/signalr';
+import { Endpoint } from './enums/apiEnum';
+import { Message } from './enums/messageEnum';
 
 function App() {
+  const [chatAtivo, setChatAtivo] = useState("edubot");
   const { enqueueSnackbar } = useSnackbar();
 
   const showMessage = (variant, message) => {
@@ -29,9 +34,58 @@ function App() {
     return userInfo;
   }
 
+  const selecionaChatAtivo = (chat) => {
+    if(chatAtivo !== chat) {
+      setChatAtivo(chat)
+    }
+  }
+
+  const createHubConnection = async () => {
+    try {
+      const hubConnection = new HubConnectionBuilder()
+        .withUrl(`${Endpoint.Bff}/Hub`)
+        .build();
+
+      return hubConnection;
+    } catch (e) {
+      showMessage(Message.Error, 'Erro de conexão');
+    }
+  };
+
+  const isSentByCurrentUser = (user) => {
+    return user === returnUserInfo().email || (user && user.toLowerCase() === "visitante")
+  }
+
+  const isSentByUser = (event) => {
+    return event === "user"
+  }
+
+  const renderMessageText = (texto) => {
+    const regex = /(https?:\/\/[^\s]+)/g;
+    const parts = texto.split(regex);
+
+    return parts.map((part, index) => {
+      if (part.match(regex)) {
+        return (
+          <a key={index} href={part} target="_blank" rel="noopener noreferrer">
+            {part}
+          </a>
+        );
+      } else {
+        return <React.Fragment key={index}>{part}</React.Fragment>;
+      }
+    });
+  };
+
   const contextStateVariables = {
     showMessage,
-    returnUserInfo
+    returnUserInfo,
+    createHubConnection,
+    isSentByCurrentUser,
+    isSentByUser,
+    renderMessageText,
+    selecionaChatAtivo,
+    chatAtivo
   };
   return (
     <>
