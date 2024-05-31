@@ -16,3 +16,11 @@ export const getMessages = async (
   const url = `/api/Bot/GetMessages?email=${email}`;
   return await get(url, context, Endpoint.Bff);
 };
+
+export const getAllMessages = async (
+  email,
+  context,
+) => {
+  const url = `/api/HistoricoConversa/GetAllMessages`;
+  return await get(url, context, Endpoint.Bff);
+};
