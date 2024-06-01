@@ -11,6 +11,8 @@ import {
 import MenuDrawer from '../../components/LayoutComponents/MenuDrawer';
 import AppContext from '../../context/context';
 import { getFuncionalidadesUtilizadas } from '../../middlewares/ReportMiddleware';
+import funcionalidadesUtilizadasReport from '../../reports/funcionalidadesUtilizadasReport';
+import { Message } from '../../enums/messageEnum';
 
 const Report = () => {
     const [tipoRelatorio, setTipoRelatorio] = useState("");
@@ -19,12 +21,35 @@ const Report = () => {
     const globalContext = useContext(AppContext);
     const userInfo = globalContext.returnUserInfo();
 
+    const convertReportPdfMakeInUrl = async (pdfDoc) => {
+        const blob = await new Promise((resolve, reject) => {
+          pdfDoc.getBlob((blob) => {
+            resolve(blob);
+          });
+        });
+    
+        const dataUrl = URL.createObjectURL(blob);
+        setPdf(dataUrl);
+    
+        return () => {
+          URL.revokeObjectURL(dataUrl);
+        };
+      };
+
     const imprimirRelatorio = () => {
-        getFuncionalidadesUtilizadas(userInfo.email, globalContext)
-        .then((resultado) => {
-          console.log("resultado", resultado)
-        })
-        .catch(() => {});
+        if(tipoRelatorio === "") {
+            globalContext.showMessage(Message.Error, "O campo Tipo de relatório é obrigatório");
+            return;
+        }
+
+        if(tipoRelatorio === "maisUtilizados") {
+            getFuncionalidadesUtilizadas(userInfo.email, globalContext)
+            .then((resultado) => {
+                const pdfGerado = funcionalidadesUtilizadasReport(resultado);
+                convertReportPdfMakeInUrl(pdfGerado);
+            })
+            .catch(() => {});
+        }
     }
   return (
     <MenuDrawer>
@@ -62,7 +87,7 @@ const Report = () => {
             </Grid>
         </Grid>
         {pdf !== '' && (
-            <Grid height="800px" width="100%">
+            <Grid mt={3} height="500px" width="100%">
                 <embed src={pdf} type="application/pdf" width="100%" height="100%" />
             </Grid>
         )}

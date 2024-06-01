@@ -1,6 +1,6 @@
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import eduBotLogo from '@/assets/img/logo.png';
+import eduBotLogo from '../assets/img/logo.png';
 
 const funcionalidadesUtilizadasReport = (data) => {
   pdfMake.vfs = pdfFonts.pdfMake.vfs;
@@ -18,7 +18,8 @@ const funcionalidadesUtilizadasReport = (data) => {
         {
           width: '20%',
           image: eduBotLogo,
-          fit: [140, 70],
+          margin: [15, 7, 0, 0],
+          fit: [100, 50],
         },
         {
           width: '60%',
@@ -33,16 +34,16 @@ const funcionalidadesUtilizadasReport = (data) => {
           margin: [0, 20, 0, 0],
           alignment: 'center',
           text: [
-            { text: 'Data: ', fontSize: 9, bold: true },
+            { text: 'Data: ', fontSize: 12, bold: true },
             {
               text: `${dataAtual}\n`,
-              fontSize: 9,
+              fontSize: 12,
               bold: true,
             },
-            { text: 'Hora: ', fontSize: 9, bold: true },
+            { text: 'Hora: ', fontSize: 12, bold: true },
             {
               text: `${horaAtual}`,
-              fontSize: 9,
+              fontSize: 12,
               bold: true,
             },
           ],
@@ -51,17 +52,17 @@ const funcionalidadesUtilizadasReport = (data) => {
     }
   ];
 
-  const dados = data.items.map((data) => {
+  const dados = data.map((data) => {
     return [
       {
-        text: data.funcionalidade,
-        fontSize: 9,
+        text: data.nome,
+        fontSize: 12,
         margin: [5, 5, 5, 5],
         alignment: 'center',
       },
       {
         text: data.total,
-        fontSize: 9,
+        fontSize: 12,
         margin: [5, 5, 5, 5],
         alignment: 'center',
       },
@@ -78,14 +79,14 @@ const funcionalidadesUtilizadasReport = (data) => {
             {
               text: 'Funcionalidade',
               style: 'tableHeader',
-              fontSize: 12,
+              fontSize: 14,
               alignment: 'center',
               bold: true,
             },
             {
               text: 'Total',
               style: 'tableHeader',
-              fontSize: 12,
+              fontSize: 14,
               alignment: 'center',
               bold: true,
             },
@@ -116,7 +117,7 @@ const funcionalidadesUtilizadasReport = (data) => {
             [
               {
                 text: `Página ${currentPage.toString()} de ${pageCount}`,
-                fontSize: 7,
+                fontSize: 10,
                 alignment: 'right',
                 margin: [3, 0],
               },
@@ -136,7 +137,7 @@ const funcionalidadesUtilizadasReport = (data) => {
       footer,
       styles: {
         reportName: {
-          fontSize: 9,
+          fontSize: 12,
           bold: true,
           alignment: 'center',
           margin: [0, 4, 0, 0],
