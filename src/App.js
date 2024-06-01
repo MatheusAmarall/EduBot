@@ -12,6 +12,7 @@ import PrivateRoute from './helpers/PrivateRoute';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { Endpoint } from './enums/apiEnum';
 import { Message } from './enums/messageEnum';
+import Report from './pages/Report/report';
 
 function App() {
   const [chatAtivo, setChatAtivo] = useState("edubot");
@@ -101,6 +102,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Login />}/> 
             <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>}/>
+            <Route path="/relatorios" element={<PrivateRoute><Report /></PrivateRoute>}/>
             <Route path="/register" element={<Register />}/>
           </Routes>
         </ThemeProvider>

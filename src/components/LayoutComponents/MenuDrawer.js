@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -38,6 +38,7 @@ import Parametrizacao from './Parametrizacao';
 import logoEduBot from '../../assets/img/logo.png';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import { getAllMessages } from '../../middlewares/HomeMiddleware';
 
 const drawerWidth = 300;
@@ -268,6 +269,14 @@ export default function MenuDrawer({ children }) {
             )}
             {userInfo.role === "Admin" && (
               <>
+                <ListItem component={Link} to={'/relatorios'}>
+                  <ListItemButton color="primary" style={{ borderRadius: '5px', color: "#000000DE" }}>
+                    <ListItemIcon>
+                      <AssessmentIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Relatórios" />
+                  </ListItemButton>
+                </ListItem>
                 <Root>
                   <Divider>Histórico de atendimentos</Divider>
                 </Root>

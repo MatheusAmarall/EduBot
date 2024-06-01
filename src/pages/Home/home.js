@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material'
 import React, { useState, useRef, useContext } from 'react'
 import MenuDrawer from '../../components/LayoutComponents/MenuDrawer';
-
 import ChatEduBot from '../../components/LayoutComponents/ChatEduBot';
 import ChatCoordenador from '../../components/LayoutComponents/ChatCoordenador';
 import AppContext from '../../context/context';
