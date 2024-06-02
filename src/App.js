@@ -62,10 +62,6 @@ function App() {
     return user === returnUserInfo().email || (user && user.toLowerCase() === "visitante")
   }
 
-  const isSentByUser = (event) => {
-    return event === "user"
-  }
-
   const renderMessageText = (texto) => {
     const regex = /(https?:\/\/[^\s]+)/g;
     const parts = texto.split(regex);
@@ -88,7 +84,6 @@ function App() {
     returnUserInfo,
     createHubConnection,
     isSentByCurrentUser,
-    isSentByUser,
     renderMessageText,
     selecionaChatAtivo,
     chatAtivo,

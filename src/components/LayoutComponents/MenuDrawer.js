@@ -113,7 +113,8 @@ export default function MenuDrawer({ children }) {
   const [userInfo, setUserInfo] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [openParametrizacao, setOpenParametrizacao] = useState(false);
-  const [historicoConversas, setHistoricoConversas] = useState([])
+  const [historicoConversas, setHistoricoConversas] = useState([]);
+  const [hubConnection, setHubConnection] = useState(null);
 
   const globalContext = useContext(AppContext);
 
@@ -178,6 +179,25 @@ export default function MenuDrawer({ children }) {
     .catch(() => {});
   }
 
+  const recuperarHistoricoMensagensUsuarios = async () => {
+    if(!hubConnection) {
+        await globalContext
+        .createHubConnection()
+        .then(async (conn) => {
+            if (conn) {
+              await conn.start();
+
+              conn.on('MessageHistory', (history) => {
+                console.log("historico", history)
+              });
+
+              setHubConnection(conn);
+            }
+        })
+        .catch(() => {});
+    }
+  };
+
   useEffect(() => {
     const userInfo = globalContext.returnUserInfo();
     setUserInfo(userInfo)
@@ -186,6 +206,7 @@ export default function MenuDrawer({ children }) {
   useEffect(() => {
     if(userInfo !== "" && userInfo.role === "Admin") {
       handleGetAllMessages();
+      recuperarHistoricoMensagensUsuarios();
     }
   }, [userInfo])
 

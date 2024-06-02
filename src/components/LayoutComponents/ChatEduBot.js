@@ -15,15 +15,19 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
   const globalContext = useContext(AppContext);
   const userInfo = globalContext.returnUserInfo();
 
-  const handleSendMessage = () =>{
+  const handleSendMessage = () => {
     const mensagem = {
-      sender: userInfo.email !== "" ? userInfo.email : "Visitante",
-      message: opcaoMensagemSelecionada !== "" ? opcaoMensagemSelecionada : mensagemDigitada
+      nomeUsuario: globalContext.conversaUsuario !== "" 
+                  ? globalContext.conversaUsuario 
+                  : userInfo.email !== "" ? userInfo.email : "Visitante",
+      mensagem: opcaoMensagemSelecionada !== "" ? opcaoMensagemSelecionada : mensagemDigitada,
+      role: userInfo.role,
+      sender: userInfo.email !== "" ? userInfo.email : "Visitante"
     };
 
     const mensagemUsuario = {
       nomeUsuario: mensagem.sender,
-      texto: mensagem.message
+      texto: mensagem.mensagem
     }
 
     setMensagens(prevState => [...prevState, mensagemUsuario]);
@@ -32,17 +36,17 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
 
     sendMessage(mensagem, globalContext)
       .then((resultado) => {
-        resultado.data.forEach((mensagem) => {
+        resultado.data.forEach((responseMessage) => {
           const mensagemBot = {
             nomeUsuario: "EduBot",
-            texto: mensagem.text,
-            buttons: mensagem.buttons
+            texto: responseMessage.text,
+            buttons: responseMessage.buttons
           }
           setMensagens(prevState => [...prevState, mensagemBot]);
-          if(mensagem.text.toLowerCase().includes("cardápio da pré-escola")) {
+          if(responseMessage.text.toLowerCase().includes("cardápio da pré-escola")) {
             downloadCardapio("pre-escola")
           }
-          else if(mensagem.text.toLowerCase().includes("cardápio do maternal")) {
+          else if(responseMessage.text.toLowerCase().includes("cardápio do maternal")) {
             downloadCardapio("maternal")
           }
         })
@@ -105,32 +109,28 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
                 </Grid>
             )}
             <List style={{ display: 'flex', flexDirection: 'column' }}>
-                {historicoMensagens && historicoMensagens.events.map((message, index) => (
-                    message.event === "user" || message.event === "bot" ? (
+                {historicoMensagens && historicoMensagens.mensagens.map((message, index) => (
                     <ListItem
                     key={index}
                     style={{
-                        textAlign: globalContext.isSentByUser(message.event) ? 'right' : 'left',
-                        flexDirection: globalContext.isSentByUser(message.event) ? 'row-reverse' : 'row'
+                      textAlign: globalContext.isSentByCurrentUser(message.sender) ? 'right' : 'left',
+                      flexDirection: globalContext.isSentByCurrentUser(message.sender) ? 'row-reverse' : 'row'
                     }}
                     >
                     <ListItemAvatar style={{
                         display: 'flex',
-                        justifyContent: globalContext.isSentByUser(message.event) ? 'flex-end' : 'flex-start'
+                        justifyContent: globalContext.isSentByCurrentUser(message.sender) ? 'flex-end' : 'flex-start'
                     }}>
-                        {globalContext.isSentByUser(message.event)
+                        {globalContext.isSentByCurrentUser(message.sender)
                         ? <Avatar alt="Profile Picture" /> 
                         : <img src={logoEduBot} alt="EDU.BOT" style={{ width: 40, height: 40, borderRadius: '50%', marginRight: 10 }} />}
                     </ListItemAvatar>
                     <ListItemText
-                        primary={globalContext.isSentByUser(message.event) ? historicoMensagens.senderId.split("@")[0] : "EduBot"}
-                        secondary={globalContext.renderMessageText(message.text)}
-                        style={{ textAlign: globalContext.isSentByUser(message.event) ? 'right' : 'left' }}
+                        primary={globalContext.isSentByCurrentUser(message.sender) ? message.sender.split("@")[0] : "EduBot"}
+                        secondary={globalContext.renderMessageText(message.body)}
+                        style={{ textAlign: globalContext.isSentByCurrentUser(message.sender) ? 'right' : 'left' }}
                     />
                     </ListItem>
-                    )
-                    :
-                    <React.Fragment key={index}></React.Fragment>
                 ))}
                 {mensagens.map((message, index) => (
                     <React.Fragment key={index}>
@@ -169,10 +169,10 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
                 ))}
             </List>
         </Grid>
-        <InputMessage 
-            mensagemDigitada={mensagemDigitada}
-            setMensagemDigitada={setMensagemDigitada}
-            handleSendMessage={handleSendMessage}
+        <InputMessage
+          mensagemDigitada={mensagemDigitada}
+          setMensagemDigitada={setMensagemDigitada}
+          handleSendMessage={handleSendMessage}
         />
     </>
   )
