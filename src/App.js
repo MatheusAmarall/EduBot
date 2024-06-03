@@ -12,6 +12,7 @@ import PrivateRoute from './helpers/PrivateRoute';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { Endpoint } from './enums/apiEnum';
 import { Message } from './enums/messageEnum';
+import Report from './pages/Report/report';
 
 function App() {
   const [chatAtivo, setChatAtivo] = useState("edubot");
@@ -61,10 +62,6 @@ function App() {
     return user === returnUserInfo().email || (user && user.toLowerCase() === "visitante")
   }
 
-  const isSentByUser = (event) => {
-    return event === "user"
-  }
-
   const renderMessageText = (texto) => {
     const regex = /(https?:\/\/[^\s]+)/g;
     const parts = texto.split(regex);
@@ -87,7 +84,6 @@ function App() {
     returnUserInfo,
     createHubConnection,
     isSentByCurrentUser,
-    isSentByUser,
     renderMessageText,
     selecionaChatAtivo,
     chatAtivo,
@@ -101,6 +97,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Login />}/> 
             <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>}/>
+            <Route path="/relatorios" element={<PrivateRoute><Report /></PrivateRoute>}/>
             <Route path="/register" element={<Register />}/>
           </Routes>
         </ThemeProvider>

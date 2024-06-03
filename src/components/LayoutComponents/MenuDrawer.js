@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { styled, useTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -38,7 +38,9 @@ import Parametrizacao from './Parametrizacao';
 import logoEduBot from '../../assets/img/logo.png';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import { getAllMessages } from '../../middlewares/HomeMiddleware';
+import AddIcon from '@mui/icons-material/Add';
 
 const drawerWidth = 300;
 
@@ -111,7 +113,8 @@ export default function MenuDrawer({ children }) {
   const [userInfo, setUserInfo] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [openParametrizacao, setOpenParametrizacao] = useState(false);
-  const [historicoConversas, setHistoricoConversas] = useState([])
+  const [historicoConversas, setHistoricoConversas] = useState([]);
+  const [hubConnection, setHubConnection] = useState(null);
 
   const globalContext = useContext(AppContext);
 
@@ -176,6 +179,25 @@ export default function MenuDrawer({ children }) {
     .catch(() => {});
   }
 
+  const recuperarHistoricoMensagensUsuarios = async () => {
+    if(!hubConnection) {
+        await globalContext
+        .createHubConnection()
+        .then(async (conn) => {
+            if (conn) {
+              await conn.start();
+
+              conn.on('MessageHistory', (history) => {
+                console.log("historico", history)
+              });
+
+              setHubConnection(conn);
+            }
+        })
+        .catch(() => {});
+    }
+  };
+
   useEffect(() => {
     const userInfo = globalContext.returnUserInfo();
     setUserInfo(userInfo)
@@ -184,6 +206,7 @@ export default function MenuDrawer({ children }) {
   useEffect(() => {
     if(userInfo !== "" && userInfo.role === "Admin") {
       handleGetAllMessages();
+      recuperarHistoricoMensagensUsuarios();
     }
   }, [userInfo])
 
@@ -210,12 +233,16 @@ export default function MenuDrawer({ children }) {
             <Grid item>
               {
                 userInfo.role === 'Admin' && (
-                  <Button variant="text" onClick={handleOpenParametrizacao}>Parametrização</Button>
+                  <Button variant="text" color="primary" onClick={handleOpenParametrizacao} 
+                    startIcon={<AddIcon />} sx={{ marginRight: 2 }}>
+                    Parametrização
+                  </Button>
                 )
               }
-              <IconButton color="primary" aria-label="informação" onClick={handleDialogOpen}>
-                <InfoOutlinedIcon sx={{ fontSize: 26 }} />
-              </IconButton>
+              <Button variant="text" color="primary" onClick={handleDialogOpen} 
+                startIcon={<InfoOutlinedIcon />}>
+                Ajuda
+              </Button>
             </Grid>
           </Grid>
         </Toolbar>
@@ -246,8 +273,8 @@ export default function MenuDrawer({ children }) {
         </DrawerHeader>
         <Grid container direction="column" height="100%">
           <Grid item style={{ flexGrow: 1 }}>
-            <ListItem>
-              <ListItemButton color="primary" style={{ borderRadius: '5px' }}
+            <ListItem component={Link} to={'/home'}>
+              <ListItemButton color="primary" style={{ borderRadius: '5px', color: "#000000DE" }}
               onClick={() => handleSelecionaChatAtivo("edubot")}>
                 <ListItemIcon>
                   <SmartToyIcon />
@@ -268,6 +295,14 @@ export default function MenuDrawer({ children }) {
             )}
             {userInfo.role === "Admin" && (
               <>
+                <ListItem component={Link} to={'/relatorios'}>
+                  <ListItemButton color="primary" style={{ borderRadius: '5px', color: "#000000DE" }}>
+                    <ListItemIcon>
+                      <AssessmentIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Relatórios" />
+                  </ListItemButton>
+                </ListItem>
                 <Root>
                   <Divider>Histórico de atendimentos</Divider>
                 </Root>
