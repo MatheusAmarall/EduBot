@@ -15,7 +15,6 @@ import { Message } from './enums/messageEnum';
 import Report from './pages/Report/report';
 
 function App() {
-  const [chatAtivo, setChatAtivo] = useState("edubot");
   const [conversaUsuario, setConversaUsuario] = useState("");
   const { enqueueSnackbar } = useSnackbar();
 
@@ -36,12 +35,6 @@ function App() {
     return userInfo;
   }
 
-  const selecionaChatAtivo = (chat) => {
-    if(chatAtivo !== chat) {
-      setChatAtivo(chat)
-    }
-  }
-
   const selecionaConversaUsuario = (nomeUsuario) => {
     setConversaUsuario(nomeUsuario)
   }
@@ -59,6 +52,9 @@ function App() {
   };
 
   const isSentByCurrentUser = (user) => {
+    if(conversaUsuario !== "") {
+      return !(conversaUsuario === user)
+    }
     return user === returnUserInfo().email || (user && user.toLowerCase() === "visitante")
   }
 
@@ -85,8 +81,6 @@ function App() {
     createHubConnection,
     isSentByCurrentUser,
     renderMessageText,
-    selecionaChatAtivo,
-    chatAtivo,
     selecionaConversaUsuario,
     conversaUsuario
   };

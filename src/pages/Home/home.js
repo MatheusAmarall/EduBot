@@ -21,19 +21,11 @@ const Home = () => {
   return (
     <MenuDrawer>
       <Grid container>
-        {globalContext.chatAtivo === "edubot" ? (
-          <ChatEduBot 
-            mensagemDigitada={mensagemDigitada} 
-            setMensagemDigitada={setMensagemDigitada} 
-            scrollToBottom={scrollToBottom} 
-            listRef={listRef} />
-        ) : (
-          <ChatCoordenador
-            mensagemDigitada={mensagemDigitada} 
-            setMensagemDigitada={setMensagemDigitada} 
-            scrollToBottom={scrollToBottom} 
-            listRef={listRef} />
-        )}
+        <ChatEduBot 
+          mensagemDigitada={mensagemDigitada} 
+          setMensagemDigitada={setMensagemDigitada} 
+          scrollToBottom={scrollToBottom} 
+          listRef={listRef} />
       </Grid>
     </MenuDrawer>
   )

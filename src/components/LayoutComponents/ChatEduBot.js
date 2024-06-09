@@ -8,54 +8,51 @@ import logoEduBot from '../../assets/img/logo.png';
 import InputMessage from './InputMessage';
 
 const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, listRef}) => {
-  const [mensagens, setMensagens] = useState([]);
-  const [historicoMensagens, setHistoricoMensagens] = useState(null);
-  const [opcaoMensagemSelecionada, setOpcaoMensagemSelecionada] = useState("");
-
   const globalContext = useContext(AppContext);
+
   const userInfo = globalContext.returnUserInfo();
+  const [mensagens, setMensagens] = useState([]);
+  const [historicoMensagens, setHistoricoMensagens] = useState({
+    nomeUsuario: userInfo.email,
+    mensagens: []
+  });
+  const [opcaoMensagemSelecionada, setOpcaoMensagemSelecionada] = useState("");
+  const [hubConnection, setHubConnection] = useState(null);
+
+  const adicionarMensagem = (mensagemUsuario) => {
+    setHistoricoMensagens((prevState) => ({
+      ...prevState,
+      mensagens: [...(prevState.mensagens || []), mensagemUsuario]
+    }));
+  };
 
   const handleSendMessage = () => {
-    const mensagem = {
-      nomeUsuario: globalContext.conversaUsuario !== "" 
-                  ? globalContext.conversaUsuario 
-                  : userInfo.email !== "" ? userInfo.email : "Visitante",
-      mensagem: opcaoMensagemSelecionada !== "" ? opcaoMensagemSelecionada : mensagemDigitada,
-      role: userInfo.role,
-      sender: userInfo.email !== "" ? userInfo.email : "Visitante"
-    };
-
-    const mensagemUsuario = {
-      nomeUsuario: mensagem.sender,
-      texto: mensagem.mensagem
+    if(hubConnection) {
+      const mensagem = {
+        nomeUsuario: globalContext.conversaUsuario !== "" 
+                    ? globalContext.conversaUsuario 
+                    : userInfo.email !== "" ? userInfo.email : "Visitante",
+        body: opcaoMensagemSelecionada !== "" ? opcaoMensagemSelecionada : mensagemDigitada,
+        role: userInfo.role,
+        sender: userInfo.email !== "" ? userInfo.email : "Visitante",
+        toBot: true
+      };
+  
+      const mensagemUsuario = {
+        body: mensagem.body,
+        role: mensagem.role,
+        sender: mensagem.sender
+      }
+  
+      adicionarMensagem(mensagemUsuario)
+      setMensagemDigitada("")
+      setOpcaoMensagemSelecionada("")
+      hubConnection.invoke("SendMessage", mensagem)
     }
-
-    setMensagens(prevState => [...prevState, mensagemUsuario]);
-    setMensagemDigitada("")
-    setOpcaoMensagemSelecionada("")
-
-    sendMessage(mensagem, globalContext)
-      .then((resultado) => {
-        resultado.data.forEach((responseMessage) => {
-          const mensagemBot = {
-            nomeUsuario: "EduBot",
-            texto: responseMessage.text,
-            buttons: responseMessage.buttons
-          }
-          setMensagens(prevState => [...prevState, mensagemBot]);
-          if(responseMessage.text.toLowerCase().includes("cardápio da pré-escola")) {
-            downloadCardapio("pre-escola")
-          }
-          else if(responseMessage.text.toLowerCase().includes("cardápio do maternal")) {
-            downloadCardapio("maternal")
-          }
-        })
-      })
-      .catch(() => {});
   }
 
-  const recuperarHistoricoMensagens = () => {
-    getMessages(userInfo.email, globalContext)
+  const recuperarHistoricoMensagens = (email) => {
+    getMessages(email, globalContext)
       .then((resultado) => {
         setHistoricoMensagens(resultado)
       })
@@ -82,11 +79,57 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
     document.body.removeChild(link);
   };
 
+  const createHubConnection = async () => {
+    if(!hubConnection) {
+        await globalContext
+        .createHubConnection()
+        .then(async (conn) => {
+            if (conn) {
+              await conn.start();
+
+              conn.on('ReceivedMessage', (messages) => {
+                messages.forEach((responseMessage) => {
+                  adicionarMensagem(responseMessage)
+
+                  if(responseMessage.sender === "EduBot") {
+                    if(responseMessage.mensagem.toLowerCase().includes("cardápio da pré-escola")) {
+                      downloadCardapio("pre-escola")
+                    }
+                    else if(responseMessage.mensagem.toLowerCase().includes("cardápio do maternal")) {
+                      downloadCardapio("maternal")
+                    }
+                  }
+                })
+              });
+
+              setHubConnection(conn);
+            }
+        })
+        .catch(() => {});
+    }
+  };
+
   useEffect(() => {
     if(userInfo.role && userInfo.role.toLowerCase() !== "visitante") {
-      recuperarHistoricoMensagens();
+      createHubConnection();
     }
+
+    return () => {
+      if (hubConnection) {
+          hubConnection.stop();
+          setHubConnection(null);
+      }
+    };
   }, [])
+
+  useEffect(() => {
+    if(globalContext.conversaUsuario !== "") {
+      recuperarHistoricoMensagens(globalContext.conversaUsuario)
+    }
+    else {
+      recuperarHistoricoMensagens(userInfo.email)
+    }
+  }, [globalContext.conversaUsuario])
 
   useEffect(() => {
     if(opcaoMensagemSelecionada !== "") {
@@ -110,6 +153,7 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
             )}
             <List style={{ display: 'flex', flexDirection: 'column' }}>
                 {historicoMensagens && historicoMensagens.mensagens.map((message, index) => (
+                    <React.Fragment key={index}>
                     <ListItem
                     key={index}
                     style={{
@@ -117,53 +161,28 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
                       flexDirection: globalContext.isSentByCurrentUser(message.sender) ? 'row-reverse' : 'row'
                     }}
                     >
-                    <ListItemAvatar style={{
-                        display: 'flex',
-                        justifyContent: globalContext.isSentByCurrentUser(message.sender) ? 'flex-end' : 'flex-start'
-                    }}>
-                        {globalContext.isSentByCurrentUser(message.sender)
-                        ? <Avatar alt="Profile Picture" /> 
-                        : <img src={logoEduBot} alt="EDU.BOT" style={{ width: 40, height: 40, borderRadius: '50%', marginRight: 10 }} />}
-                    </ListItemAvatar>
-                    <ListItemText
-                        primary={globalContext.isSentByCurrentUser(message.sender) ? message.sender.split("@")[0] : "EduBot"}
-                        secondary={globalContext.renderMessageText(message.body)}
-                        style={{ textAlign: globalContext.isSentByCurrentUser(message.sender) ? 'right' : 'left' }}
-                    />
-                    </ListItem>
-                ))}
-                {mensagens.map((message, index) => (
-                    <React.Fragment key={index}>
-                    <ListItem
-                    key={index}
-                    style={{
-                        textAlign: globalContext.isSentByCurrentUser(message.nomeUsuario) ? 'right' : 'left',
-                        flexDirection: globalContext.isSentByCurrentUser(message.nomeUsuario) ? 'row-reverse' : 'row'
-                    }}
-                    >
-                    <ListItemAvatar style={{
-                        display: 'flex',
-                        justifyContent: globalContext.isSentByCurrentUser(message.nomeUsuario) ? 'flex-end' : 'flex-start'
-                    }}>
-                        
-                        {globalContext.isSentByCurrentUser(message.nomeUsuario)
-                        ? <Avatar alt="Profile Picture" /> 
-                        : <img src={logoEduBot} alt="EDU.BOT" style={{ width: 40, height: 40, borderRadius: '50%', marginRight: 10 }} />}
-                    </ListItemAvatar>
-                    <ListItemText
-                        primary={message.nomeUsuario.includes("@") ? message.nomeUsuario.split("@")[0] : message.nomeUsuario}
-                        secondary={globalContext.renderMessageText(message.texto)}
-                        style={{ textAlign: globalContext.isSentByCurrentUser(message.nomeUsuario) ? 'right' : 'left' }}
-                    />
+                      <ListItemAvatar style={{
+                          display: 'flex',
+                          justifyContent: globalContext.isSentByCurrentUser(message.sender) ? 'flex-end' : 'flex-start'
+                      }}>
+                          {globalContext.isSentByCurrentUser(message.sender)
+                          ? <Avatar alt="Profile Picture" /> 
+                          : <img src={logoEduBot} alt="EDU.BOT" style={{ width: 40, height: 40, borderRadius: '50%', marginRight: 10 }} />}
+                      </ListItemAvatar>
+                      <ListItemText
+                          primary={globalContext.isSentByCurrentUser(message.sender) ? message.sender.split("@")[0] : message.sender}
+                          secondary={globalContext.renderMessageText(message.body)}
+                          style={{ textAlign: globalContext.isSentByCurrentUser(message.sender) ? 'right' : 'left' }}
+                      />
                     </ListItem>
                     {message.buttons && message.buttons.length > 0 && (
-                    <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                        {message.buttons.map((button, buttonIndex) => (
-                        <Button key={buttonIndex} variant="text" onClick={() => handleSelecionarOpcao(button.payload, index)}>
-                            {button.title}
-                        </Button>
-                        ))}
-                    </div>
+                      <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                          {message.buttons.map((button, buttonIndex) => (
+                          <Button key={buttonIndex} variant="text" onClick={() => handleSelecionarOpcao(button.payload, index)}>
+                              {button.title}
+                          </Button>
+                          ))}
+                      </div>
                     )}
                     </React.Fragment>
                 ))}

@@ -162,13 +162,8 @@ export default function MenuDrawer({ children }) {
     return userInfo.email;
   }
 
-  const handleSelecionaChatAtivo = (chat) => {
-    globalContext.selecionaChatAtivo(chat)
-  }
-
   const handleSelecionaConversaUsuario = (nomeUsuario) => {
     globalContext.selecionaConversaUsuario(nomeUsuario)
-    handleSelecionaChatAtivo("coordenador")
   }
 
   const handleGetAllMessages = () => {
@@ -188,7 +183,7 @@ export default function MenuDrawer({ children }) {
               await conn.start();
 
               conn.on('MessageHistory', (history) => {
-                console.log("historico", history)
+                setHistoricoConversas(history)
               });
 
               setHubConnection(conn);
@@ -275,24 +270,13 @@ export default function MenuDrawer({ children }) {
           <Grid item style={{ flexGrow: 1 }}>
             <ListItem component={Link} to={'/home'}>
               <ListItemButton color="primary" style={{ borderRadius: '5px', color: "#000000DE" }}
-              onClick={() => handleSelecionaChatAtivo("edubot")}>
+                onClick={() => handleSelecionaConversaUsuario("")}>
                 <ListItemIcon>
                   <SmartToyIcon />
                 </ListItemIcon>
                 <ListItemText primary="Chat EduBot" />
               </ListItemButton>
             </ListItem>
-            {userInfo.role === "User" && (
-              <ListItem>
-                <ListItemButton color="primary" style={{ borderRadius: '5px' }} 
-                  onClick={() => handleSelecionaChatAtivo("coordenador")}>
-                  <ListItemIcon>
-                    <MenuBookIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Chat Coordenador" />
-                </ListItemButton>
-              </ListItem>
-            )}
             {userInfo.role === "Admin" && (
               <>
                 <ListItem component={Link} to={'/relatorios'}>
