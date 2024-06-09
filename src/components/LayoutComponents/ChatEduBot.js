@@ -119,13 +119,13 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
 
       globalContext.hubConnection.on('StartService', (nomeUsuario) => {
         if(globalContext.isSentByCurrentUser(nomeUsuario)) {
-          adicionarMensagem("Coordenador entrou")
+          adicionarMensagem(["Coordenador entrou"])
         }
       })
 
       globalContext.hubConnection.on('EndService', (nomeUsuario) => {
         if(globalContext.isSentByCurrentUser(nomeUsuario)) {
-          adicionarMensagem("Coordenador saiu")
+          adicionarMensagem(["Coordenador saiu"])
         }
       })
     }
@@ -179,22 +179,22 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
                       <ListItem
                       key={index}
                       style={{
-                        textAlign: globalContext.isSentByCurrentUser(message.sender) ? 'right' : 'left',
-                        flexDirection: globalContext.isSentByCurrentUser(message.sender) ? 'row-reverse' : 'row'
+                        textAlign: globalContext.onRightSide(message.sender) ? 'right' : 'left',
+                        flexDirection: globalContext.onRightSide(message.sender) ? 'row-reverse' : 'row'
                       }}
                       >
                         <ListItemAvatar style={{
                             display: 'flex',
-                            justifyContent: globalContext.isSentByCurrentUser(message.sender) ? 'flex-end' : 'flex-start'
+                            justifyContent: globalContext.onRightSide(message.sender) ? 'flex-end' : 'flex-start'
                         }}>
                             {message.sender === "EduBot"
                             ? <img src={logoEduBot} alt="EDU.BOT" style={{ width: 40, height: 40, borderRadius: '50%', marginRight: 10 }} />
                             : <Avatar alt="Profile Picture" /> }
                         </ListItemAvatar>
                         <ListItemText
-                            primary={globalContext.isSentByCurrentUser(message.sender) ? message.sender.split("@")[0] : message.sender}
+                            primary={globalContext.onRightSide(message.sender) ? message.sender.split("@")[0] : message.sender}
                             secondary={globalContext.renderMessageText(message.body)}
-                            style={{ textAlign: globalContext.isSentByCurrentUser(message.sender) ? 'right' : 'left' }}
+                            style={{ textAlign: globalContext.onRightSide(message.sender) ? 'right' : 'left' }}
                         />
                       </ListItem>
                       {message.buttons && message.buttons.length > 0 && (

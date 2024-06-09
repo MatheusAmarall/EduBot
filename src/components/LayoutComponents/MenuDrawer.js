@@ -150,6 +150,7 @@ export default function MenuDrawer({ children }) {
     logoutUser(dadosLogout, globalContext)
     .then(() => {
       globalContext.showMessage(Message.Success, "Deslogado com sucesso");
+      globalContext.stopHubConnection();
       navigate("/")
     })
     .catch(() => {});
@@ -157,6 +158,7 @@ export default function MenuDrawer({ children }) {
   }
 
   const handleLogin = () => {
+    globalContext.stopHubConnection();
     navigate("/")
   }
 

@@ -66,8 +66,15 @@ function App() {
 
   const isSentByCurrentUser = (user) => {
     return returnUserInfo().email !== "" 
-    ? user === returnUserInfo().email 
-    : user === returnUserInfo().role
+      ? user === returnUserInfo().email 
+      : user === returnUserInfo().role
+  }
+
+  const onRightSide = (user) => {
+    if(conversaUsuario !== "") {
+      return !(conversaUsuario === user)
+    }
+    return user === returnUserInfo().email || (user && user.toLowerCase() === "visitante")
   }
 
   const renderMessageText = (texto) => {
@@ -87,15 +94,17 @@ function App() {
     });
   };
 
-  useEffect(() => {
-    startHubConnection();
+  const stopHubConnection = () => {
+    if (hubConnection) {
+      hubConnection.stop();
+      setHubConnection(null);
+    }
+  }
 
-    return () => {
-      if (hubConnection) {
-        hubConnection.stop();
-        setHubConnection(null);
-      }
-    };
+  useEffect(() => {
+    if(hubConnection === null) {
+      startHubConnection();
+    }
   }, [])
 
   const contextStateVariables = {
@@ -106,7 +115,9 @@ function App() {
     renderMessageText,
     selecionaConversaUsuario,
     conversaUsuario,
-    hubConnection
+    hubConnection,
+    onRightSide,
+    stopHubConnection
   };
 
   return (
