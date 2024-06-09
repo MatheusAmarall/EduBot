@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ThemeProvider } from '@mui/material';
 import './App.css';
 import Home from './pages/Home/home';
@@ -16,6 +16,7 @@ import Report from './pages/Report/report';
 
 function App() {
   const [conversaUsuario, setConversaUsuario] = useState("");
+  const [hubConnection, setHubConnection] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
 
   const showMessage = (variant, message) => {
@@ -51,11 +52,22 @@ function App() {
     }
   };
 
+  const startHubConnection = async () => {
+    createHubConnection()
+    .then(async (conn) => {
+      if (conn) {
+        await conn.start();
+
+        setHubConnection(conn);
+      }
+    })
+    .catch(() => {});
+  }
+
   const isSentByCurrentUser = (user) => {
-    if(conversaUsuario !== "") {
-      return !(conversaUsuario === user)
-    }
-    return user === returnUserInfo().email || (user && user.toLowerCase() === "visitante")
+    return returnUserInfo().email !== "" 
+    ? user === returnUserInfo().email 
+    : user === returnUserInfo().role
   }
 
   const renderMessageText = (texto) => {
@@ -75,6 +87,17 @@ function App() {
     });
   };
 
+  useEffect(() => {
+    startHubConnection();
+
+    return () => {
+      if (hubConnection) {
+        hubConnection.stop();
+        setHubConnection(null);
+      }
+    };
+  }, [])
+
   const contextStateVariables = {
     showMessage,
     returnUserInfo,
@@ -82,8 +105,10 @@ function App() {
     isSentByCurrentUser,
     renderMessageText,
     selecionaConversaUsuario,
-    conversaUsuario
+    conversaUsuario,
+    hubConnection
   };
+
   return (
     <>
       <AppContext.Provider value={contextStateVariables}>

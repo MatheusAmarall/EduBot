@@ -1,8 +1,8 @@
 import React from 'react'
-import { Grid, IconButton, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material'
+import { Grid, IconButton, FormControl, InputLabel, OutlinedInput, InputAdornment, CircularProgress  } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send';
 
-const InputMessage = ({mensagemDigitada, setMensagemDigitada, handleSendMessage}) => {
+const InputMessage = ({mensagemDigitada, setMensagemDigitada, handleSendMessage, loading }) => {
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
           handleSendMessage();
@@ -19,13 +19,14 @@ const InputMessage = ({mensagemDigitada, setMensagemDigitada, handleSendMessage}
                 setMensagemDigitada(e.target.value)
             }}
             onKeyPress={handleKeyPress}
+            disabled={loading}
             endAdornment={<InputAdornment position="end">
             <IconButton
                 aria-label="toggle password visibility"
                 onClick={handleSendMessage}
                 edge="end"
             >
-                <SendIcon />
+                {loading ? <CircularProgress size={24} /> : <SendIcon />}
             </IconButton>
             </InputAdornment>}
             label="Digite sua mensagem"

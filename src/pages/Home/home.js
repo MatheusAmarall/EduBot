@@ -1,14 +1,10 @@
 import { Grid } from '@mui/material'
-import React, { useState, useRef, useContext } from 'react'
+import React, { useState, useRef } from 'react'
 import MenuDrawer from '../../components/LayoutComponents/MenuDrawer';
 import ChatEduBot from '../../components/LayoutComponents/ChatEduBot';
-import ChatCoordenador from '../../components/LayoutComponents/ChatCoordenador';
-import AppContext from '../../context/context';
 
 const Home = () => {
   const [mensagemDigitada, setMensagemDigitada] = useState("");
-
-  const globalContext = useContext(AppContext);
 
   const listRef = useRef(null);
   
