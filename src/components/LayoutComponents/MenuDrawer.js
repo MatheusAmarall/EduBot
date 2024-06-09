@@ -27,6 +27,7 @@ import {
   DialogTitle,
   DialogContent,
   Button,
+  Tooltip 
 } from '@mui/material'
 import MuiAppBar from '@mui/material/AppBar';
 import CloseIcon from '@mui/icons-material/Close';
@@ -36,11 +37,12 @@ import { Message } from '../../enums/messageEnum';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import Parametrizacao from './Parametrizacao';
 import logoEduBot from '../../assets/img/logo.png';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { getAllMessages } from '../../middlewares/HomeMiddleware';
 import AddIcon from '@mui/icons-material/Add';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import DoneIcon from '@mui/icons-material/Done';
 
 const drawerWidth = 300;
 
@@ -148,6 +150,7 @@ export default function MenuDrawer({ children }) {
     logoutUser(dadosLogout, globalContext)
     .then(() => {
       globalContext.showMessage(Message.Success, "Deslogado com sucesso");
+      globalContext.stopHubConnection();
       navigate("/")
     })
     .catch(() => {});
@@ -155,6 +158,7 @@ export default function MenuDrawer({ children }) {
   }
 
   const handleLogin = () => {
+    globalContext.stopHubConnection();
     navigate("/")
   }
 
@@ -162,13 +166,36 @@ export default function MenuDrawer({ children }) {
     return userInfo.email;
   }
 
-  const handleSelecionaChatAtivo = (chat) => {
-    globalContext.selecionaChatAtivo(chat)
+  const handleSelecionaConversaUsuario = async (nomeUsuario) => {
+    if(hubConnection !== null) {
+      if(nomeUsuario !== "") {
+        try {
+          await hubConnection.invoke("DisableBot", nomeUsuario);
+        } catch (error) {
+          globalContext.showMessage(Message.Error, "Erro na conexão com o servidor, verifique com o suporte");
+        }
+      }
+      else {
+        try {
+          await hubConnection.invoke("ActivateBot", globalContext.conversaUsuario);
+        } catch (error) {
+          globalContext.showMessage(Message.Error, "Erro na conexão com o servidor, verifique com o suporte");
+        }
+        hubConnection.invoke("ActivateBot", globalContext.conversaUsuario)
+      }
+    }
+    globalContext.selecionaConversaUsuario(nomeUsuario)
   }
 
-  const handleSelecionaConversaUsuario = (nomeUsuario) => {
-    globalContext.selecionaConversaUsuario(nomeUsuario)
-    handleSelecionaChatAtivo("coordenador")
+  const handleConcluirAtendimento = async () => {
+    if(hubConnection !== null) {
+      try {
+        await hubConnection.invoke("ActivateBot", globalContext.conversaUsuario);
+      } catch (error) {
+        globalContext.showMessage(Message.Error, "Erro na conexão com o servidor, verifique com o suporte");
+      }
+    }
+    globalContext.selecionaConversaUsuario("")
   }
 
   const handleGetAllMessages = () => {
@@ -188,7 +215,7 @@ export default function MenuDrawer({ children }) {
               await conn.start();
 
               conn.on('MessageHistory', (history) => {
-                console.log("historico", history)
+                setHistoricoConversas(history)
               });
 
               setHubConnection(conn);
@@ -232,17 +259,30 @@ export default function MenuDrawer({ children }) {
             
             <Grid item>
               {
-                userInfo.role === 'Admin' && (
-                  <Button variant="text" color="primary" onClick={handleOpenParametrizacao} 
-                    startIcon={<AddIcon />} sx={{ marginRight: 2 }}>
-                    Parametrização
+                globalContext.conversaUsuario !== "" ? (
+                  <Button variant="text" color="primary" onClick={handleConcluirAtendimento} 
+                    startIcon={<DoneIcon />}>
+                    Concluir atendimento
                   </Button>
+                ) :
+                (
+                  <>
+                    {
+                      userInfo.role === 'Admin' && (
+                        <Button variant="text" color="primary" onClick={handleOpenParametrizacao} 
+                          startIcon={<AddIcon />} sx={{ marginRight: 2 }}>
+                          Parametrização
+                        </Button>
+                      )
+                    }
+                    <Button variant="text" color="primary" onClick={handleDialogOpen} 
+                      startIcon={<InfoOutlinedIcon />}>
+                      Ajuda
+                    </Button>
+                  </>
                 )
               }
-              <Button variant="text" color="primary" onClick={handleDialogOpen} 
-                startIcon={<InfoOutlinedIcon />}>
-                Ajuda
-              </Button>
+              
             </Grid>
           </Grid>
         </Toolbar>
@@ -275,24 +315,13 @@ export default function MenuDrawer({ children }) {
           <Grid item style={{ flexGrow: 1 }}>
             <ListItem component={Link} to={'/home'}>
               <ListItemButton color="primary" style={{ borderRadius: '5px', color: "#000000DE" }}
-              onClick={() => handleSelecionaChatAtivo("edubot")}>
+                onClick={() => handleSelecionaConversaUsuario("")}>
                 <ListItemIcon>
                   <SmartToyIcon />
                 </ListItemIcon>
                 <ListItemText primary="Chat EduBot" />
               </ListItemButton>
             </ListItem>
-            {userInfo.role === "User" && (
-              <ListItem>
-                <ListItemButton color="primary" style={{ borderRadius: '5px' }} 
-                  onClick={() => handleSelecionaChatAtivo("coordenador")}>
-                  <ListItemIcon>
-                    <MenuBookIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Chat Coordenador" />
-                </ListItemButton>
-              </ListItem>
-            )}
             {userInfo.role === "Admin" && (
               <>
                 <ListItem component={Link} to={'/relatorios'}>
@@ -309,13 +338,18 @@ export default function MenuDrawer({ children }) {
                 <List>
                   {historicoConversas.map((conversa, index) => (
                     <ListItem key={index}>
-                      <ListItemButton onClick={() => handleSelecionaConversaUsuario(conversa.nomeUsuario)}>
+                      <ListItemButton>
                         <ListItemIcon>
                           <Avatar alt="Profile Picture" />
                         </ListItemIcon>
                         <ListItemText 
                           primary={conversa.nomeUsuario.split("@")[0]}
                           secondary={conversa.mensagens[conversa.mensagens.length - 1].body} />
+                        <Tooltip title="Iniciar atendimento">
+                          <IconButton edge="end" onClick={() => handleSelecionaConversaUsuario(conversa.nomeUsuario)}>
+                            <PlayArrowIcon style={{ color: 'green' }} />
+                          </IconButton>
+                        </Tooltip>
                       </ListItemButton>
                     </ListItem>
                   ))}

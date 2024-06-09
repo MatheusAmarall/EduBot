@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ThemeProvider } from '@mui/material';
 import './App.css';
 import Home from './pages/Home/home';
@@ -15,8 +15,8 @@ import { Message } from './enums/messageEnum';
 import Report from './pages/Report/report';
 
 function App() {
-  const [chatAtivo, setChatAtivo] = useState("edubot");
   const [conversaUsuario, setConversaUsuario] = useState("");
+  const [hubConnection, setHubConnection] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
 
   const showMessage = (variant, message) => {
@@ -36,12 +36,6 @@ function App() {
     return userInfo;
   }
 
-  const selecionaChatAtivo = (chat) => {
-    if(chatAtivo !== chat) {
-      setChatAtivo(chat)
-    }
-  }
-
   const selecionaConversaUsuario = (nomeUsuario) => {
     setConversaUsuario(nomeUsuario)
   }
@@ -58,7 +52,28 @@ function App() {
     }
   };
 
+  const startHubConnection = async () => {
+    createHubConnection()
+    .then(async (conn) => {
+      if (conn) {
+        await conn.start();
+
+        setHubConnection(conn);
+      }
+    })
+    .catch(() => {});
+  }
+
   const isSentByCurrentUser = (user) => {
+    return returnUserInfo().email !== "" 
+      ? user === returnUserInfo().email 
+      : user === returnUserInfo().role
+  }
+
+  const onRightSide = (user) => {
+    if(conversaUsuario !== "") {
+      return !(conversaUsuario === user)
+    }
     return user === returnUserInfo().email || (user && user.toLowerCase() === "visitante")
   }
 
@@ -79,17 +94,32 @@ function App() {
     });
   };
 
+  const stopHubConnection = () => {
+    if (hubConnection) {
+      hubConnection.stop();
+      setHubConnection(null);
+    }
+  }
+
+  useEffect(() => {
+    if(hubConnection === null) {
+      startHubConnection();
+    }
+  }, [])
+
   const contextStateVariables = {
     showMessage,
     returnUserInfo,
     createHubConnection,
     isSentByCurrentUser,
     renderMessageText,
-    selecionaChatAtivo,
-    chatAtivo,
     selecionaConversaUsuario,
-    conversaUsuario
+    conversaUsuario,
+    hubConnection,
+    onRightSide,
+    stopHubConnection
   };
+
   return (
     <>
       <AppContext.Provider value={contextStateVariables}>
