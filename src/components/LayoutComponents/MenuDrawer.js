@@ -182,14 +182,6 @@ export default function MenuDrawer({ children }) {
           globalContext.showMessage(Message.Error, "Erro na conexão com o servidor, verifique com o suporte");
         }
       }
-      else {
-        try {
-          await hubConnection.invoke("ActivateBot", globalContext.conversaUsuario);
-        } catch (error) {
-          globalContext.showMessage(Message.Error, "Erro na conexão com o servidor, verifique com o suporte");
-        }
-        hubConnection.invoke("ActivateBot", globalContext.conversaUsuario)
-      }
     }
     globalContext.selecionaConversaUsuario(nomeUsuario)
   }
@@ -322,7 +314,7 @@ export default function MenuDrawer({ children }) {
           <Grid item style={{ flexGrow: 1 }}>
             <ListItem component={Link} to={'/home'}>
               <ListItemButton color="primary" style={{ borderRadius: '5px', color: "#000000DE" }}
-                onClick={() => handleSelecionaConversaUsuario("")}>
+                onClick={handleConcluirAtendimento}>
                 <ListItemIcon>
                   <SmartToyIcon />
                 </ListItemIcon>
@@ -353,7 +345,11 @@ export default function MenuDrawer({ children }) {
                           </ListItemIcon>
                           <ListItemText 
                             primary={conversa.nomeUsuario.split("@")[0]}
-                            secondary={conversa.mensagens[conversa.mensagens.length - 1].body} 
+                            secondary={
+                              conversa.mensagens[conversa.mensagens.length - 1].body.length > 10 
+                                ? `${conversa.mensagens[conversa.mensagens.length - 1].body.slice(0, 10)}...`
+                                : conversa.mensagens[conversa.mensagens.length - 1].body
+                            } 
                           />
                           <Tooltip title="Iniciar atendimento">
                             <IconButton
