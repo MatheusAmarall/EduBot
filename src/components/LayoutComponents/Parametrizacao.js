@@ -122,10 +122,13 @@ const Parametrizacao = ({openDialog, setOpenDialog}) => {
        
         createNewStory(story, globalContext)
         .then(() => {
-            globalContext.showMessage(Message.Success, "Nova parametrização criada com sucesso");
-            handleCloseDialog();
         })
-        .catch(() => {});
+        .catch(() => {
+            globalContext.showMessage(Message.Error, `Erro ao criar nova parametrização`);
+        });
+
+        globalContext.showMessage(Message.Info, `Iniciando parametrização, acompanhe da aba de 'Ajuda'`);
+        handleCloseDialog();
     }
   return (
     <Dialog
