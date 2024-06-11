@@ -106,10 +106,10 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
           adicionarMensagem(messages)
           messages.forEach((responseMessage) => {
             if(responseMessage.sender === "EduBot") {
-              if(responseMessage.mensagem.toLowerCase().includes("cardápio da pré-escola")) {
+              if(responseMessage.body.toLowerCase().includes("cardápio da pré-escola")) {
                 downloadCardapio("pre-escola")
               }
-              else if(responseMessage.mensagem.toLowerCase().includes("cardápio do maternal")) {
+              else if(responseMessage.body.toLowerCase().includes("cardápio do maternal")) {
                 downloadCardapio("maternal")
               }
             }
