@@ -184,6 +184,7 @@ export default function MenuDrawer({ children }) {
       }
     }
     globalContext.selecionaConversaUsuario(nomeUsuario)
+    navigate("/home")
   }
 
   const handleConcluirAtendimento = async () => {
