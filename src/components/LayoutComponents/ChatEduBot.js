@@ -194,7 +194,11 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
                         <ListItemText
                             primary={globalContext.onRightSide(message.sender) ? message.sender.split("@")[0] : message.sender}
                             secondary={globalContext.renderMessageText(message.body)}
-                            style={{ textAlign: globalContext.onRightSide(message.sender) ? 'right' : 'left' }}
+                            style={{ 
+                              textAlign: globalContext.onRightSide(message.sender) ? 'right' : 'left',
+                              maxWidth: 400,
+                              wordBreak: 'break-word'
+                            }}
                         />
                       </ListItem>
                       {message.buttons && message.buttons.length > 0 && (

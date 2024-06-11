@@ -34,7 +34,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import AppContext from '../../context/context';
 import { logoutUser } from '../../middlewares/AuthMiddleware';
 import { Message } from '../../enums/messageEnum';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import Parametrizacao from './Parametrizacao';
 import logoEduBot from '../../assets/img/logo.png';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
@@ -43,6 +42,8 @@ import { getAllMessages } from '../../middlewares/HomeMiddleware';
 import AddIcon from '@mui/icons-material/Add';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DoneIcon from '@mui/icons-material/Done';
+import { getFuncionalidadesParametrizadas } from '../../middlewares/ParametrizacaoMiddleware';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const drawerWidth = 300;
 
@@ -113,10 +114,11 @@ export default function MenuDrawer({ children }) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [userInfo, setUserInfo] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openAjuda, setOpenAjuda] = useState(false);
   const [openParametrizacao, setOpenParametrizacao] = useState(false);
   const [historicoConversas, setHistoricoConversas] = useState([]);
   const [hubConnection, setHubConnection] = useState(null);
+  const [funcionalidadesParametrizadas, setFuncionalidadesParametrizadas] = useState([])
 
   const globalContext = useContext(AppContext);
 
@@ -130,12 +132,17 @@ export default function MenuDrawer({ children }) {
     setOpen(false);
   };
 
-  const handleDialogOpen = () => {
-    setOpenDialog(true);
+  const handleOpenAjuda = () => {
+    getFuncionalidadesParametrizadas(globalContext)
+    .then((res) => {
+      setFuncionalidadesParametrizadas(res)
+      setOpenAjuda(true);
+    })
+    .catch(() => {})
   };
   
-  const handleDialogClose = () => {
-    setOpenDialog(false);
+  const handleCloseAjuda = () => {
+    setOpenAjuda(false);
   };
 
   const handleOpenParametrizacao = () => {
@@ -174,14 +181,6 @@ export default function MenuDrawer({ children }) {
         } catch (error) {
           globalContext.showMessage(Message.Error, "Erro na conexão com o servidor, verifique com o suporte");
         }
-      }
-      else {
-        try {
-          await hubConnection.invoke("ActivateBot", globalContext.conversaUsuario);
-        } catch (error) {
-          globalContext.showMessage(Message.Error, "Erro na conexão com o servidor, verifique com o suporte");
-        }
-        hubConnection.invoke("ActivateBot", globalContext.conversaUsuario)
       }
     }
     globalContext.selecionaConversaUsuario(nomeUsuario)
@@ -275,7 +274,7 @@ export default function MenuDrawer({ children }) {
                         </Button>
                       )
                     }
-                    <Button variant="text" color="primary" onClick={handleDialogOpen} 
+                    <Button variant="text" color="primary" onClick={handleOpenAjuda} 
                       startIcon={<InfoOutlinedIcon />}>
                       Ajuda
                     </Button>
@@ -315,7 +314,7 @@ export default function MenuDrawer({ children }) {
           <Grid item style={{ flexGrow: 1 }}>
             <ListItem component={Link} to={'/home'}>
               <ListItemButton color="primary" style={{ borderRadius: '5px', color: "#000000DE" }}
-                onClick={() => handleSelecionaConversaUsuario("")}>
+                onClick={handleConcluirAtendimento}>
                 <ListItemIcon>
                   <SmartToyIcon />
                 </ListItemIcon>
@@ -336,23 +335,35 @@ export default function MenuDrawer({ children }) {
                   <Divider>Histórico de atendimentos</Divider>
                 </Root>
                 <List>
-                  {historicoConversas.map((conversa, index) => (
-                    <ListItem key={index}>
-                      <ListItemButton>
-                        <ListItemIcon>
-                          <Avatar alt="Profile Picture" />
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary={conversa.nomeUsuario.split("@")[0]}
-                          secondary={conversa.mensagens[conversa.mensagens.length - 1].body} />
-                        <Tooltip title="Iniciar atendimento">
-                          <IconButton edge="end" onClick={() => handleSelecionaConversaUsuario(conversa.nomeUsuario)}>
-                            <PlayArrowIcon style={{ color: 'green' }} />
-                          </IconButton>
-                        </Tooltip>
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
+                  {historicoConversas.map((conversa, index) => {
+                    const isDisabled = globalContext.conversaUsuario === conversa.nomeUsuario;
+                    return (
+                      <ListItem key={index}>
+                        <ListItemButton>
+                          <ListItemIcon>
+                            <Avatar alt="Profile Picture" />
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary={conversa.nomeUsuario.split("@")[0]}
+                            secondary={
+                              conversa.mensagens[conversa.mensagens.length - 1].body.length > 10 
+                                ? `${conversa.mensagens[conversa.mensagens.length - 1].body.slice(0, 10)}...`
+                                : conversa.mensagens[conversa.mensagens.length - 1].body
+                            } 
+                          />
+                          <Tooltip title="Iniciar atendimento">
+                            <IconButton
+                              edge="end"
+                              onClick={() => handleSelecionaConversaUsuario(conversa.nomeUsuario)}
+                              disabled={isDisabled}
+                            >
+                              <PlayArrowIcon style={{ color: isDisabled ? 'grey' : 'green' }} />
+                            </IconButton>
+                          </Tooltip>
+                        </ListItemButton>
+                      </ListItem>
+                    );
+                  })}
                 </List>
               </>
             )}
@@ -378,16 +389,16 @@ export default function MenuDrawer({ children }) {
         <Grid container marginTop={5}>
           {children}
           <BootstrapDialog
-            onClose={handleDialogClose}
+            onClose={handleCloseAjuda}
             aria-labelledby="customized-dialog-title"
-            open={openDialog}
+            open={openAjuda}
           >
             <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
               Ajuda
             </DialogTitle>
             <IconButton
               aria-label="close"
-              onClick={handleDialogClose}
+              onClick={handleCloseAjuda}
               sx={{
                 position: 'absolute',
                 right: 8,
@@ -404,28 +415,38 @@ export default function MenuDrawer({ children }) {
               <List>
                 <ListItem>
                   <ListItemIcon>
-                    <AssignmentIcon />
+                    <DoneIcon style={{ color: 'green' }} />
                   </ListItemIcon>
                   <ListItemText primary="Lista de materiais" />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
-                    <AssignmentIcon />
+                    <DoneIcon style={{ color: 'green' }} />
                   </ListItemIcon>
                   <ListItemText primary="Lista de matrícula" />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
-                    <AssignmentIcon />
+                    <DoneIcon style={{ color: 'green' }} />
                   </ListItemIcon>
                   <ListItemText primary="Merenda" />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
-                    <AssignmentIcon />
+                    <DoneIcon style={{ color: 'green' }} />
                   </ListItemIcon>
                   <ListItemText primary="Lista de espera" />
                 </ListItem>
+                {funcionalidadesParametrizadas.map((funcionalidade) => (
+                  <ListItem>
+                    <ListItemIcon>
+                      {funcionalidade.disponivel 
+                      ?  <DoneIcon style={{ color: 'green' }} /> 
+                      : <AccessTimeIcon style={{ color: 'yellow' }} /> }
+                    </ListItemIcon>
+                    <ListItemText primary={funcionalidade.nomeFuncionalidade} />
+                  </ListItem>
+                ))}
               </List>
             </DialogContent>
           </BootstrapDialog>
