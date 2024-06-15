@@ -149,23 +149,20 @@ export default function MenuDrawer({ children }) {
     setOpenParametrizacao(true);
   };
 
-  const handleLogout = () => {
-    const dadosLogout = {
-      email: userInfo.email
-    };
+  const stopHubConnection = () => {
+    if (hubConnection) {
+      hubConnection.stop();
+      setHubConnection(null);
+    }
+  }
 
-    logoutUser(dadosLogout, globalContext)
-    .then(() => {
-      globalContext.showMessage(Message.Success, "Deslogado com sucesso");
-      globalContext.stopHubConnection();
-      navigate("/")
-    })
-    .catch(() => {});
-    
+  const handleLogout = () => {
+    stopHubConnection();
+    globalContext.handleLogoutUser();
   }
 
   const handleLogin = () => {
-    globalContext.stopHubConnection();
+    stopHubConnection();
     navigate("/")
   }
 
@@ -234,6 +231,10 @@ export default function MenuDrawer({ children }) {
     if(userInfo !== "" && userInfo.role === "Admin") {
       handleGetAllMessages();
       recuperarHistoricoMensagensUsuarios();
+    }
+
+    return () => {
+      stopHubConnection();
     }
   }, [userInfo])
 

@@ -76,6 +76,12 @@ const Login = () => {
         navigate(url)
     }
 
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleLogin();
+        }
+      };
+
     useEffect(() => {
         sessionStorage.clear();
     }, [])
@@ -113,6 +119,7 @@ const Login = () => {
                             <InputLabel htmlFor="senha">Senha *</InputLabel>
                             <OutlinedInput
                                 id="senha"
+                                onKeyPress={handleKeyPress}
                                 type={showPassword ? "text" : "password"}
                                 endAdornment={
                                 <InputAdornment position="end">

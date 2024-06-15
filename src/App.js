@@ -4,7 +4,7 @@ import './App.css';
 import Home from './pages/Home/home';
 import Login from './pages/Login/login';
 import Register from './pages/Register/register';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { theme } from './theme/theme';
 import AppContext from './context/context';
 import { useSnackbar } from 'notistack';
@@ -13,11 +13,13 @@ import { HubConnectionBuilder } from '@microsoft/signalr';
 import { Endpoint } from './enums/apiEnum';
 import { Message } from './enums/messageEnum';
 import Report from './pages/Report/report';
+import { logoutUser } from './middlewares/AuthMiddleware';
 
 function App() {
   const [conversaUsuario, setConversaUsuario] = useState("");
-  const [hubConnection, setHubConnection] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
+
+  const navigate = useNavigate();
 
   const showMessage = (variant, message) => {
     enqueueSnackbar(message, { variant });
@@ -44,6 +46,7 @@ function App() {
     try {
       const hubConnection = new HubConnectionBuilder()
         .withUrl(`${Endpoint.Bff}/Hub`)
+        .withAutomaticReconnect()
         .build();
 
       return hubConnection;
@@ -51,18 +54,6 @@ function App() {
       showMessage(Message.Error, 'Erro de conexão');
     }
   };
-
-  const startHubConnection = async () => {
-    createHubConnection()
-    .then(async (conn) => {
-      if (conn) {
-        await conn.start();
-
-        setHubConnection(conn);
-      }
-    })
-    .catch(() => {});
-  }
 
   const isSentByCurrentUser = (user) => {
     return returnUserInfo().email !== "" 
@@ -94,18 +85,18 @@ function App() {
     });
   };
 
-  const stopHubConnection = () => {
-    if (hubConnection) {
-      hubConnection.stop();
-      setHubConnection(null);
-    }
-  }
+  const handleLogoutUser = () => {
+    const dadosLogout = {
+      email: returnUserInfo().email
+    };
 
-  useEffect(() => {
-    if(hubConnection === null) {
-      startHubConnection();
-    }
-  }, [])
+    logoutUser(dadosLogout, contextStateVariables)
+    .then(() => {
+      showMessage(Message.Success, "Deslogado com sucesso");
+      navigate("/")
+    })
+    .catch(() => {});
+  }
 
   const contextStateVariables = {
     showMessage,
@@ -115,9 +106,8 @@ function App() {
     renderMessageText,
     selecionaConversaUsuario,
     conversaUsuario,
-    hubConnection,
     onRightSide,
-    stopHubConnection
+    handleLogoutUser
   };
 
   return (

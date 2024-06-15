@@ -18,6 +18,7 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
   });
   const [opcaoMensagemSelecionada, setOpcaoMensagemSelecionada] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hubConnection, setHubConnection] = useState(null);
 
   const globalContextRef = useRef(globalContext);
 
@@ -33,7 +34,7 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
   };
 
   const handleSendMessage = async () => {
-    if(globalContext.hubConnection) {
+    if(hubConnection) {
       if(mensagemDigitada === "" && opcaoMensagemSelecionada === "") {
         globalContext.showMessage(Message.Error, "Digite uma mensagem");
         return;
@@ -52,7 +53,7 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
       setMensagemDigitada("")
       setOpcaoMensagemSelecionada("")
       try {
-        await globalContext.hubConnection.invoke("SendMessage", mensagem);
+        await hubConnection.invoke("SendMessage", mensagem);
       } catch (error) {
         globalContext.showMessage(Message.Error, "Erro ao enviar a mensagem");
       } finally {
@@ -98,8 +99,12 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
   };
 
   const configureHubConnection = async (globalContextRef) => {
-    if(globalContext.hubConnection !== null) {
-      globalContext.hubConnection.on('ReceivedMessage', (messages) => {
+    if(hubConnection !== null) {
+      hubConnection.off('ReceivedMessage');
+      hubConnection.off('StartService');
+      hubConnection.off('EndService');
+
+      hubConnection.on('ReceivedMessage', (messages) => {
         if(globalContext.isSentByCurrentUser(messages[0].nomeUsuario)
           || globalContextRef.current.conversaUsuario === messages[0].nomeUsuario) 
         {
@@ -117,13 +122,13 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
         }
       });
 
-      globalContext.hubConnection.on('StartService', (nomeUsuario) => {
+      hubConnection.on('StartService', (nomeUsuario) => {
         if(globalContext.isSentByCurrentUser(nomeUsuario)) {
           adicionarMensagem(["Coordenador entrou"])
         }
       })
 
-      globalContext.hubConnection.on('EndService', (nomeUsuario) => {
+      hubConnection.on('EndService', (nomeUsuario) => {
         if(globalContext.isSentByCurrentUser(nomeUsuario)) {
           adicionarMensagem(["Coordenador saiu"])
         }
@@ -132,13 +137,46 @@ const ChatEduBot = ({mensagemDigitada, setMensagemDigitada, scrollToBottom, list
   };
 
   useEffect(() => {
-    if(globalContext.hubConnection !== null) {
+    if(hubConnection !== null) {
       configureHubConnection(globalContextRef);
     }
-  }, [globalContext.hubConnection])
+  }, [hubConnection])
+
+  const stopHubConnection = () => {
+    if (hubConnection) {
+      hubConnection.stop();
+      setHubConnection(null);
+    }
+  }
+
+  const startHubConnection = async () => {
+    globalContext.createHubConnection()
+    .then(async (conn) => {
+      if (conn) {
+        await conn.start();
+
+        setHubConnection(conn);
+      }
+    })
+    .catch(() => {});
+  }
+
+  useEffect(() => {
+    if(hubConnection === null) {
+      startHubConnection();
+    }
+
+    return () => {
+      stopHubConnection();
+    };
+  }, [])
 
   useEffect(() => {
     if(userInfo.role && userInfo.role.toLowerCase() !== "visitante") {
+      setHistoricoMensagens(prevHistorico => ({
+        ...prevHistorico,
+        mensagens: []
+      }));
       if(globalContext.conversaUsuario !== "") {
         recuperarHistoricoMensagens(globalContext.conversaUsuario)
       }
