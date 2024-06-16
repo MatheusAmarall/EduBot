@@ -460,6 +460,16 @@ export default function MenuDrawer({ children }) {
                   </ListItemIcon>
                   <ListItemText primary="Lista de espera" />
                 </ListItem>
+                {userInfo.role === "User" && (
+                  <ListItem>
+                    <ListItemIcon>
+                      <Tooltip title="Disponível" arrow>
+                        <DoneIcon style={{ color: 'green' }} />
+                      </Tooltip>
+                    </ListItemIcon>
+                    <ListItemText primary="Agendamento" />
+                  </ListItem>
+                )}
                 {funcionalidadesParametrizadas.map((funcionalidade) => (
                   <ListItem>
                     <ListItemIcon>
