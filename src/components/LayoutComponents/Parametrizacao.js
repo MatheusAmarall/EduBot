@@ -71,11 +71,17 @@ const Parametrizacao = ({openDialog, setOpenDialog}) => {
     };
 
     const handleSendPergunta = () => {
+        if(perguntaDigitada === "") {
+            return;
+        }
         setPerguntas(prevState => [...prevState, perguntaDigitada]);
         setPerguntaDigitada("");
     }
 
     const handleSendResposta = () => {
+        if(respostaDigitada === "") {
+            return;
+        }
         setRespostas(prevState => [...prevState, respostaDigitada]);
         setRespostaDigitada("");
     }
@@ -193,19 +199,44 @@ const Parametrizacao = ({openDialog, setOpenDialog}) => {
                                     marginBottom: '40px',
                                     marginTop: '20px'
                                 }}>
-                                    {perguntas.map((value, index) => (
-                                    <ListItem
-                                        key={value}
-                                        disableGutters
-                                        secondaryAction={
-                                        <IconButton aria-label="comment">
-                                            <DeleteIcon onClick={() => handleRemovePergunta(index)} />
-                                        </IconButton>
-                                        }
-                                    >
-                                        <ListItemText primary={value} />
-                                    </ListItem>
-                                    ))}
+                                    {perguntas.length === 0 ? (
+                                        <Box
+                                            sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            height: '100%',
+                                            }}
+                                        >
+                                            <Typography variant="body1" color="textPrimary">
+                                                Bem-vindo à etapa de parametrização do seu chatbot!
+
+                                                <Typography variant="body1" color="textPrimary" paragraph>
+                                                    Para começar, Você irá cadastrar o título da sua nova pergunta e as possíveis abordagens que os seus usuários terão para fazer a pergunta. Por exemplo:
+                                                </Typography>
+
+                                                <Typography variant="body1" color="textPrimary">
+                                                    Como faço para verificar minha matrícula?<br />
+                                                    Qual é o procedimento para descobrir minha matrícula?<br />
+                                                    Pode me informar qual é a minha matrícula?
+                                                </Typography>
+                                            </Typography>
+                                        </Box>
+                                    ) : (
+                                        perguntas.map((value, index) => (
+                                            <ListItem
+                                            key={value}
+                                            disableGutters
+                                            secondaryAction={
+                                                <IconButton aria-label="comment" onClick={() => handleRemovePergunta(index)}>
+                                                <DeleteIcon />
+                                                </IconButton>
+                                            }
+                                            >
+                                            <ListItemText primary={value} />
+                                            </ListItem>
+                                        ))
+                                    )}
                                 </List>
                             </Grid>
                         </Grid>
@@ -249,20 +280,36 @@ const Parametrizacao = ({openDialog, setOpenDialog}) => {
                                     marginBottom: '40px',
                                     marginTop: '20px'
                                 }}>
-                                {respostas.map((value, index) => (
-                                    <ListItem
-                                        key={value}
-                                        disableGutters
-                                        secondaryAction={
-                                        <IconButton aria-label="comment">
-                                            <DeleteIcon onClick={() => handleRemoveResposta(index)}/>
-                                        </IconButton>
-                                        }
-                                    >
-                                        <ListItemText primary={value} />
-                                    </ListItem>
-                                    ))}
+                                    {respostas.length === 0 ? (
+                                        <Box
+                                            sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            height: '100%',
+                                            }}
+                                        >
+                                            <Typography variant="body1" color="textPrimary">
+                                                Nessa etapa você irá cadastrar a(s) resposta(s) da sua nova pergunta.
+                                            </Typography>
+                                        </Box>
+                                    ) : (
+                                        respostas.map((value, index) => (
+                                            <ListItem
+                                                key={value}
+                                                disableGutters
+                                                secondaryAction={
+                                                <IconButton aria-label="comment">
+                                                    <DeleteIcon onClick={() => handleRemoveResposta(index)}/>
+                                                </IconButton>
+                                                }
+                                            >
+                                                <ListItemText primary={value} />
+                                            </ListItem>
+                                            ))
+                                        )}
                                 </List>
+                                    
                             </Grid>
                         </Grid>
                         <Grid item xs={12}>

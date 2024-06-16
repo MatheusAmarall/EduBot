@@ -49,7 +49,13 @@ const Login = () => {
             sessionStorage.setItem("token", resultado.data.token);
             sessionStorage.setItem("role", resultado.data.role);
             sessionStorage.setItem("email", resultado.data.email);
-            handleNavigate("/home")
+            console.log("role", resultado.data.role)
+            if(resultado.data.role === "Admin") {
+                handleNavigate("/agendamentos")
+            }
+            else {
+                handleNavigate("/home")
+            }
         })
         .catch(() => {});
     }

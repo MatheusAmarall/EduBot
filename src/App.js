@@ -14,6 +14,7 @@ import { Endpoint } from './enums/apiEnum';
 import { Message } from './enums/messageEnum';
 import Report from './pages/Report/report';
 import { logoutUser } from './middlewares/AuthMiddleware';
+import Agendamentos from './pages/Agendamentos/agendamentos';
 
 function App() {
   const [conversaUsuario, setConversaUsuario] = useState("");
@@ -115,7 +116,8 @@ function App() {
       <AppContext.Provider value={contextStateVariables}>
         <ThemeProvider theme={theme}>
           <Routes>
-            <Route path="/" element={<Login />}/> 
+            <Route path="/" element={<Login />}/>
+            <Route path="/agendamentos" element={<PrivateRoute><Agendamentos /></PrivateRoute>}/>
             <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>}/>
             <Route path="/relatorios" element={<PrivateRoute><Report /></PrivateRoute>}/>
             <Route path="/register" element={<Register />}/>
