@@ -49,7 +49,13 @@ const Login = () => {
             sessionStorage.setItem("token", resultado.data.token);
             sessionStorage.setItem("role", resultado.data.role);
             sessionStorage.setItem("email", resultado.data.email);
-            handleNavigate("/home")
+            console.log("role", resultado.data.role)
+            if(resultado.data.role === "Admin") {
+                handleNavigate("/agendamentos")
+            }
+            else {
+                handleNavigate("/home")
+            }
         })
         .catch(() => {});
     }
@@ -75,6 +81,12 @@ const Login = () => {
     const handleNavigate = (url) => {
         navigate(url)
     }
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleLogin();
+        }
+      };
 
     useEffect(() => {
         sessionStorage.clear();
@@ -113,6 +125,7 @@ const Login = () => {
                             <InputLabel htmlFor="senha">Senha *</InputLabel>
                             <OutlinedInput
                                 id="senha"
+                                onKeyPress={handleKeyPress}
                                 type={showPassword ? "text" : "password"}
                                 endAdornment={
                                 <InputAdornment position="end">

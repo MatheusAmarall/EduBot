@@ -113,6 +113,10 @@ export const onDelete = async (
 };
 
 const getErrorList = (error) => {
+    if(error.response.status === 401) {
+      _context.handleLogoutUser();
+      return 'Não autorizado'
+    }
     if (error.message === 'Network Error') {
       return 'API não disponível, por favor entre em contato com o suporte';
     }

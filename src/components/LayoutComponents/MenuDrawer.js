@@ -32,7 +32,6 @@ import {
 import MuiAppBar from '@mui/material/AppBar';
 import CloseIcon from '@mui/icons-material/Close';
 import AppContext from '../../context/context';
-import { logoutUser } from '../../middlewares/AuthMiddleware';
 import { Message } from '../../enums/messageEnum';
 import Parametrizacao from './Parametrizacao';
 import logoEduBot from '../../assets/img/logo.png';
@@ -44,6 +43,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DoneIcon from '@mui/icons-material/Done';
 import { getFuncionalidadesParametrizadas } from '../../middlewares/ParametrizacaoMiddleware';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import EventNoteIcon from '@mui/icons-material/EventNote';
 
 const drawerWidth = 300;
 
@@ -149,23 +149,20 @@ export default function MenuDrawer({ children }) {
     setOpenParametrizacao(true);
   };
 
-  const handleLogout = () => {
-    const dadosLogout = {
-      email: userInfo.email
-    };
+  const stopHubConnection = () => {
+    if (hubConnection) {
+      hubConnection.stop();
+      setHubConnection(null);
+    }
+  }
 
-    logoutUser(dadosLogout, globalContext)
-    .then(() => {
-      globalContext.showMessage(Message.Success, "Deslogado com sucesso");
-      globalContext.stopHubConnection();
-      navigate("/")
-    })
-    .catch(() => {});
-    
+  const handleLogout = () => {
+    stopHubConnection();
+    globalContext.handleLogoutUser();
   }
 
   const handleLogin = () => {
-    globalContext.stopHubConnection();
+    stopHubConnection();
     navigate("/")
   }
 
@@ -234,6 +231,10 @@ export default function MenuDrawer({ children }) {
     if(userInfo !== "" && userInfo.role === "Admin") {
       handleGetAllMessages();
       recuperarHistoricoMensagensUsuarios();
+    }
+
+    return () => {
+      stopHubConnection();
     }
   }, [userInfo])
 
@@ -313,6 +314,17 @@ export default function MenuDrawer({ children }) {
         </DrawerHeader>
         <Grid container direction="column" height="100%">
           <Grid item style={{ flexGrow: 1 }}>
+            {userInfo.role === "Admin" && (
+              <ListItem component={Link} to={'/agendamentos'}>
+                <ListItemButton color="primary" style={{ borderRadius: '5px', color: "#000000DE" }}
+                  onClick={handleConcluirAtendimento}>
+                  <ListItemIcon>
+                    <EventNoteIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Agendamentos" />
+                </ListItemButton>
+              </ListItem>
+            )}
             <ListItem component={Link} to={'/home'}>
               <ListItemButton color="primary" style={{ borderRadius: '5px', color: "#000000DE" }}
                 onClick={handleConcluirAtendimento}>
@@ -344,15 +356,17 @@ export default function MenuDrawer({ children }) {
                           <ListItemIcon>
                             <Avatar alt="Profile Picture" />
                           </ListItemIcon>
-                          <ListItemText 
-                            primary={conversa.nomeUsuario.split("@")[0]}
-                            secondary={
-                              conversa.mensagens[conversa.mensagens.length - 1].body.length > 10 
-                                ? `${conversa.mensagens[conversa.mensagens.length - 1].body.slice(0, 10)}...`
-                                : conversa.mensagens[conversa.mensagens.length - 1].body
-                            } 
-                          />
-                          <Tooltip title="Iniciar atendimento">
+                          <Tooltip title={conversa.mensagens[conversa.mensagens.length - 1].body} arrow>
+                            <ListItemText 
+                              primary={conversa.nomeUsuario.split("@")[0]}
+                              secondary={
+                                conversa.mensagens[conversa.mensagens.length - 1].body.length > 10 
+                                  ? `${conversa.mensagens[conversa.mensagens.length - 1].body.slice(0, 10)}...`
+                                  : conversa.mensagens[conversa.mensagens.length - 1].body
+                              } 
+                            />
+                          </Tooltip>
+                          <Tooltip title="Iniciar atendimento" arrow>
                             <IconButton
                               edge="end"
                               onClick={() => handleSelecionaConversaUsuario(conversa.nomeUsuario)}
@@ -416,34 +430,52 @@ export default function MenuDrawer({ children }) {
               <List>
                 <ListItem>
                   <ListItemIcon>
-                    <DoneIcon style={{ color: 'green' }} />
+                    <Tooltip title="Disponível" arrow>
+                      <DoneIcon style={{ color: 'green' }} />
+                    </Tooltip>
                   </ListItemIcon>
                   <ListItemText primary="Lista de materiais" />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
-                    <DoneIcon style={{ color: 'green' }} />
+                    <Tooltip title="Disponível" arrow>
+                      <DoneIcon style={{ color: 'green' }} />
+                    </Tooltip>
                   </ListItemIcon>
                   <ListItemText primary="Lista de matrícula" />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
-                    <DoneIcon style={{ color: 'green' }} />
+                    <Tooltip title="Disponível" arrow>
+                      <DoneIcon style={{ color: 'green' }} />
+                    </Tooltip>
                   </ListItemIcon>
                   <ListItemText primary="Merenda" />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
-                    <DoneIcon style={{ color: 'green' }} />
+                    <Tooltip title="Disponível" arrow>
+                      <DoneIcon style={{ color: 'green' }} />
+                    </Tooltip>
                   </ListItemIcon>
                   <ListItemText primary="Lista de espera" />
                 </ListItem>
+                {userInfo.role === "User" && (
+                  <ListItem>
+                    <ListItemIcon>
+                      <Tooltip title="Disponível" arrow>
+                        <DoneIcon style={{ color: 'green' }} />
+                      </Tooltip>
+                    </ListItemIcon>
+                    <ListItemText primary="Agendamento" />
+                  </ListItem>
+                )}
                 {funcionalidadesParametrizadas.map((funcionalidade) => (
                   <ListItem>
                     <ListItemIcon>
                       {funcionalidade.disponivel 
-                      ?  <DoneIcon style={{ color: 'green' }} /> 
-                      : <AccessTimeIcon style={{ color: 'yellow' }} /> }
+                      ?  <Tooltip title="Disponível" arrow><DoneIcon style={{ color: 'green' }} /></Tooltip> 
+                      :  <Tooltip title="Pendente" arrow><AccessTimeIcon style={{ color: 'yellow' }} /></Tooltip> } 
                     </ListItemIcon>
                     <ListItemText primary={funcionalidade.nomeFuncionalidade} />
                   </ListItem>
